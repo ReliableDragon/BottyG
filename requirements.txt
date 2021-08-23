@@ -1,1 +1,2 @@
-discord.py
+discord.py==1.7.3
+honcho==1.0.1
