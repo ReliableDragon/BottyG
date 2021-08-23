@@ -11,7 +11,7 @@ export HOME=/root
 git clone https://github.com/SethBorder/BottyG.git /bots/botty_g
 
 # Set up venv
-python3 -m venv /bots/botty_g/env
+virtualenv -p python3 /bots/botty_g/env
 source /bots/botty_g/env/bin/activate
 /bots/botty_g/env/bin/pip install -r /bots/botty_g/requirements.txt
 
