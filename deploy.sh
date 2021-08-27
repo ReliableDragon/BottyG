@@ -13,4 +13,4 @@ gcloud compute instances create $INSTANCE \
     --metadata-from-file startup-script=startup.sh \
     --zone $ZONE
 
-gcloud compute scp token.txt $INSTANCE:/bots/botty_g/token.txt
+gcloud compute scp token.txt $INSTANCE:/bots/botty_g/token.txt --zone=us-central1-a
