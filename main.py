@@ -35,36 +35,57 @@ class BottyG(discord.Client):
         atomic_frontier = self.get_guild(atomic_frontier_id)
 
         EMOJIS = {
-            'bobby_g': discord.utils.get(atomic_frontier.emojis, id=875428431133810740),
-            'spotty2': discord.utils.get(atomic_frontier.emojis, id=868858506776817675),
-            'spotty3': discord.utils.get(atomic_frontier.emojis, id=868858496257515520),
-            'spotty_fire': discord.utils.get(atomic_frontier.emojis, id=868858516687958126),
-            'spotty_nose_cone': discord.utils.get(atomic_frontier.emojis, id=868858516687958126),
-            'spotty_thruster': discord.utils.get(atomic_frontier.emojis, id=871842514213142598),
+            'bobby_g': discord.utils.get(
+                atomic_frontier.emojis, id=875428431133810740),
+            'spotty2': discord.utils.get(
+                atomic_frontier.emojis, id=868858506776817675),
+            'spotty3': discord.utils.get(
+                atomic_frontier.emojis, id=868858496257515520),
+            'spotty_fire': discord.utils.get(
+                atomic_frontier.emojis, id=868858516687958126),
+            'spotty_nose_cone': discord.utils.get(
+                atomic_frontier.emojis, id=868858516687958126),
+            'spotty_thruster': discord.utils.get(
+                atomic_frontier.emojis, id=871842514213142598),
         }
-        ROCKET_MESSAGE = f"{EMOJIS['spotty_fire']} {EMOJIS['spotty_thruster']} {EMOJIS['spotty2']} {EMOJIS['spotty3']} {EMOJIS['spotty2']} {EMOJIS['spotty3']} {EMOJIS['spotty_nose_cone']}"
-        ROCKET_BASE = f"{EMOJIS['spotty_fire']} {EMOJIS['spotty_thruster']} {EMOJIS['spotty2']} {EMOJIS['spotty3']}"
+        ROCKET_MESSAGE = "{} {} {} {} {} {} {}".format(
+            {EMOJIS['spotty_fire']},
+            {EMOJIS['spotty_thruster']},
+            {EMOJIS['spotty2']},
+            {EMOJIS['spotty3']},
+            {EMOJIS['spotty2']},
+            {EMOJIS['spotty3']},
+            {EMOJIS['spotty_nose_cone']})
+        ROCKET_BASE = "{} {} {} {}".format(
+            {EMOJIS['spotty_fire']},
+            {EMOJIS['spotty_thruster']},
+            {EMOJIS['spotty2']},
+            {EMOJIS['spotty3']})
 
     async def on_message(self, message):
         print('Got a message!')
+        msg = message.content.lower()
 
         if message.author == client.user:
             return
 
-        if message.content.startswith('!rocket'):
+        if msg.startswith('!rocket'):
             print('Sending rocket')
             await message.channel.send(ROCKET_MESSAGE)
 
-        if message.content.lower().find('bobby g') != -1:
+        if (msg.find('bobby g') != -1 or
+            msg.find('goddard') != -1):
             print('Sending bobby g')
             await message.add_reaction(EMOJIS['bobby_g'])
 
-        if message.content.startswith('!payload'):
+        if msg.startswith('!payload'):
             payload = message.content[9:]
-            print(f'Sending rocket with payload: {payload}')
-            await message.channel.send(ROCKET_BASE + f' {payload} {EMOJIS["spotty_nose_cone"]}')
+            print('Sending rocket with payload: {}'.format(payload))
+            await message.channel.send(
+                ROCKET_BASE +
+                ' {} {}'.format(payload, EMOJIS["spotty_nose_cone"]))
 
-        if message.content.startswith('!advice'):
+        if msg.startswith('!advice'):
             rand_num = random.randint(0, len(QUOTES))
             await message.channel.send(QUOTES[rand_num])
 
