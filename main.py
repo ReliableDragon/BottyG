@@ -29,8 +29,8 @@ QUOTES = (
 EMOJIS = defaultdict(lambda: 'Failed to load Atomic Frontier emojis!')
 ROCKET_MESSAGE = "Rocket failed to load!"
 ROCKET_BASE = "Rocket base failed to load!"
-RBP_ROCKET = "RBP rocket failed to load!"
-RBP_EMOJI = "RBP emoji failed to load!"
+# RBP_ROCKET = "RBP rocket failed to load!"
+# RBP_EMOJI = "RBP emoji failed to load!"
 
 intents = discord.Intents.none()
 intents.messages = True
@@ -39,8 +39,8 @@ client = discord.Client(intents = intents)
 
 class BottyG(discord.Client):
     async def on_ready(self):
-        global RBP_EMOJI
-        global RBP_ROCKET
+        # global RBP_EMOJI
+        # global RBP_ROCKET
         global EMOJIS
         global ROCKET_MESSAGE
         global ROCKET_BASE
@@ -50,21 +50,22 @@ class BottyG(discord.Client):
         logger.info(self.user.id)
         logger.info('------')
 
-        rbp_id = 879111900485517394
-        rbp = self.get_guild(rbp_id)
-        logger.info('rbp guild: {}'.format(rbp))
-        RBP_EMOJI = str(discord.utils.get(rbp.emojis, id=879130415502360636))
-        logger.info('RBP Emoji: {}'.format(RBP_EMOJI))
-        RBP_ROCKET = "{} {} {} {}".format(
-            RBP_EMOJI,
-            RBP_EMOJI,
-            RBP_EMOJI,
-            RBP_EMOJI)
-        logger.info('RBP Rocket: {}'.format(RBP_ROCKET))
+        # rbp_id = 879111900485517394
+        # rbp = self.get_guild(rbp_id)
+        # logger.info('rbp guild: {}'.format(rbp))
+        # RBP_EMOJI = str(discord.utils.get(rbp.emojis, id=879130415502360636))
+        # logger.info('RBP Emoji: {}'.format(RBP_EMOJI))
+        # RBP_ROCKET = "{} {} {} {}".format(
+        #     RBP_EMOJI,
+        #     RBP_EMOJI,
+        #     RBP_EMOJI,
+        #     RBP_EMOJI)
+        # logger.info('RBP Rocket: {}'.format(RBP_ROCKET))
 
         atomic_frontier_id = 800703973890850836
         atomic_frontier = self.get_guild(atomic_frontier_id)
         if atomic_frontier != None:
+            logger.info('Loaded Atomic Frontier data!')
             EMOJIS = {
                 'bobby_g': discord.utils.get(
                     atomic_frontier.emojis, id=875428431133810740),
@@ -101,19 +102,19 @@ class BottyG(discord.Client):
             logger.info('We sent this message!')
             return
 
-        if msg.startswith('!debug_rocket'):
-            logger.info('Sending debug rocket: {}'.format(RBP_ROCKET))
-            await message.channel.send(RBP_ROCKET)
-
-        if msg.startswith('!debug_payload'):
-            logger.info('Sending debug payload')
-            payload = message.content[14:]
-            await message.channel.send(
-                '{} {} {}'.format(RBP_ROCKET, payload, RBP_EMOJI))
-
-        if msg.find('H5XGD54XI4N18LVTR8M594DRT2JNMOW5'.lower()) != -1:
-            logger.info('Sending debug reaction')
-            await message.add_reaction(RBP_EMOJI)
+        # if msg.startswith('!debug_rocket'):
+        #     logger.info('Sending debug rocket: {}'.format(RBP_ROCKET))
+        #     await message.channel.send(RBP_ROCKET)
+        #
+        # if msg.startswith('!debug_payload'):
+        #     logger.info('Sending debug payload')
+        #     payload = message.content[14:]
+        #     await message.channel.send(
+        #         '{} {} {}'.format(RBP_ROCKET, payload, RBP_EMOJI))
+        #
+        # if msg.find('H5XGD54XI4N18LVTR8M594DRT2JNMOW5'.lower()) != -1:
+        #     logger.info('Sending debug reaction')
+        #     await message.add_reaction(RBP_EMOJI)
 
         if msg.startswith('!rocket'):
             logger.info('Sending rocket')
