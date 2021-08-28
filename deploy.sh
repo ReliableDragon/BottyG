@@ -18,4 +18,4 @@ echo "Waiting for filesystem to be created..."
 sleep 30
 echo "Attempting to copy token."
 
-gcloud compute scp token.txt "botrunner@$INSTANCE:/bots/botty_g/token.txt" --zone=us-central1-a
+gcloud compute scp token.txt "botrunner@$INSTANCE:/bots/botty_g/" --zone=us-central1-a
