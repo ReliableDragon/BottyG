@@ -1,9 +1,17 @@
 import discord
 import random
 import logging
+from logging.handlers import RotatingFileHandler
 from collections import defaultdict
 
-logging.basicConfig(filename='botty_g.log', level=logging.DEBUG)
+my_handler = RotatingFileHandler(
+    'botty_g.log', mode='a', maxBytes=5*1024*1024, backupCount=2)
+my_handler.setLevel(logging.DEBUG)
+
+logger = logging.getLogger('root')
+logger.setLevel(logging.DEBUG)
+logger.addHandler(my_handler)
+
 TOKEN = open('token.txt','r').readline()
 
 QUOTES = (
@@ -37,22 +45,22 @@ class BottyG(discord.Client):
         global ROCKET_MESSAGE
         global ROCKET_BASE
 
-        logging.info('Logged in as')
-        logging.info(self.user.name)
-        logging.info(self.user.id)
-        logging.info('------')
+        logger.info('Logged in as')
+        logger.info(self.user.name)
+        logger.info(self.user.id)
+        logger.info('------')
 
         rbp_id = 879111900485517394
         rbp = self.get_guild(rbp_id)
-        logging.info('rbp guild: {}'.format(rbp))
+        logger.info('rbp guild: {}'.format(rbp))
         RBP_EMOJI = str(discord.utils.get(rbp.emojis, id=879130415502360636))
-        logging.info('RBP Emoji: {}'.format(RBP_EMOJI))
+        logger.info('RBP Emoji: {}'.format(RBP_EMOJI))
         RBP_ROCKET = "{} {} {} {}".format(
             RBP_EMOJI,
             RBP_EMOJI,
             RBP_EMOJI,
             RBP_EMOJI)
-        logging.info('RBP Rocket: {}'.format(RBP_ROCKET))
+        logger.info('RBP Rocket: {}'.format(RBP_ROCKET))
 
         atomic_frontier_id = 800703973890850836
         atomic_frontier = self.get_guild(atomic_frontier_id)
@@ -87,44 +95,44 @@ class BottyG(discord.Client):
 
     async def on_message(self, message):
         msg = message.content.lower()
-        logging.info('Got a message: {}'.format(msg))
+        logger.info('Got a message: {}'.format(msg))
 
         if message.author == client.user:
-            logging.info('We sent this message!')
+            logger.info('We sent this message!')
             return
 
         if msg.startswith('!debug_rocket'):
-            logging.info('Sending debug rocket: {}'.format(RBP_ROCKET))
+            logger.info('Sending debug rocket: {}'.format(RBP_ROCKET))
             await message.channel.send(RBP_ROCKET)
 
         if msg.startswith('!debug_payload'):
-            logging.info('Sending debug payload')
+            logger.info('Sending debug payload')
             payload = message.content[14:]
             await message.channel.send(
                 '{} {} {}'.format(RBP_ROCKET, payload, RBP_EMOJI))
 
         if msg.find('H5XGD54XI4N18LVTR8M594DRT2JNMOW5'.lower()) != -1:
-            logging.info('Sending debug reaction')
+            logger.info('Sending debug reaction')
             await message.add_reaction(RBP_EMOJI)
 
         if msg.startswith('!rocket'):
-            logging.info('Sending rocket')
+            logger.info('Sending rocket')
             await message.channel.send(ROCKET_MESSAGE)
 
         if (msg.find('bobby g') != -1 or
             msg.find('goddard') != -1):
-            logging.info('Sending bobby g')
+            logger.info('Sending bobby g')
             await message.add_reaction(EMOJIS['bobby_g'])
 
         if msg.startswith('!payload'):
             payload = message.content[9:]
-            logging.info('Sending rocket with payload: {}'.format(payload))
+            logger.info('Sending rocket with payload: {}'.format(payload))
             await message.channel.send(
                 '{} {} {}'.format(
                     ROCKET_BASE, payload, EMOJIS["spotty_nose_cone"]))
 
         if msg.startswith('!advice'):
-            logging.info('Sending advice.')
+            logger.info('Sending advice.')
             rand_num = random.randint(0, len(QUOTES))
             await message.channel.send(QUOTES[rand_num])
 
