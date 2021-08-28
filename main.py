@@ -87,7 +87,7 @@ class BottyG(discord.Client):
                 EMOJIS['spotty3'],
                 EMOJIS['spotty2'],
                 EMOJIS['spotty3'],
-                EMOJIS['spotty_nose_cone']})
+                EMOJIS['spotty_nose_cone'])
             ROCKET_BASE = "{} {} {} {}".format(
                 EMOJIS['spotty_fire'],
                 EMOJIS['spotty_thruster'],
