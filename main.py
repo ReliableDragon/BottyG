@@ -125,7 +125,7 @@ class BottyG(discord.Client):
             rocket = ROCKET_THRUST
             stop = msg.find('cket')
             rocket += ROCKET_BODY
-            for _ in range(msg[:stop]).count('o'):
+            for _ in range(len(msg[:stop].count('o'))):
               rocket += ROCKET_BODY
             rocket += ROCKET_NOSE
             await message.channel.send(rocket)
