@@ -32,12 +32,14 @@ BAGUETTE_CLIP = "https://cdn.discordapp.com/attachments/875464533362216960/88099
 SAND_CLIP = "https://cdn.discordapp.com/attachments/800703974205685790/820105727707447336/sandful_of_hand.mp4"
 
 EMOJIS = defaultdict(lambda: 'Failed to load Atomic Frontier emojis!')
-ROCKET_MESSAGE = "Emojis failed to load!"
+ROCKET = "Emojis failed to load!"
+ROCKET_REV = "Emojis failed to load!"
 ROCKET_NOSE = "Emojis failed to load!"
+ROCKET_NOSE_REV = "Emojis failed to load!"
 ROCKET_THRUST = "Emojis failed to load!"
+ROCKET_THRUST_REV = "Emojis failed to load!"
 ROCKET_BODY = "Emojis failed to load!"
-# RBP_ROCKET = "RBP rocket failed to load!"
-# RBP_EMOJI = "RBP emoji failed to load!"
+ROCKET_BODY_REV = "Emojis failed to load!"
 
 intents = discord.Intents.none()
 intents.messages = True
@@ -46,31 +48,20 @@ client = discord.Client(intents = intents)
 
 class BottyG(discord.Client):
     async def on_ready(self):
-        # global RBP_EMOJI
-        # global RBP_ROCKET
         global EMOJIS
-        global ROCKET_MESSAGE
-        global ROCKET_BASE
+        global ROCKET
+        global ROCKET_REV
         global ROCKET_THRUST
+        global ROCKET_THRUST_REV
         global ROCKET_BODY
+        global ROCKET_BODY_REV
         global ROCKET_NOSE
+        global ROCKET_NOSE_REV
 
         logger.info('Logged in as')
         logger.info(self.user.name)
         logger.info(self.user.id)
         logger.info('------')
-
-        # rbp_id = 879111900485517394
-        # rbp = self.get_guild(rbp_id)
-        # logger.info('rbp guild: {}'.format(rbp))
-        # RBP_EMOJI = str(discord.utils.get(rbp.emojis, id=879130415502360636))
-        # logger.info('RBP Emoji: {}'.format(RBP_EMOJI))
-        # RBP_ROCKET = "{} {} {} {}".format(
-        #     RBP_EMOJI,
-        #     RBP_EMOJI,
-        #     RBP_EMOJI,
-        #     RBP_EMOJI)
-        # logger.info('RBP Rocket: {}'.format(RBP_ROCKET))
 
         atomic_frontier_id = 800703973890850836
         atomic_frontier = self.get_guild(atomic_frontier_id)
@@ -87,10 +78,14 @@ class BottyG(discord.Client):
                     atomic_frontier.emojis, id=871843033883213914)),
                 'spotty_nose_cone': str(discord.utils.get(
                     atomic_frontier.emojis, id=868858516687958126)),
+                'spotty_nose_cone_rev': str(discord.utils.get(
+                    atomic_frontier.emojis, id=875529103984431154)),
                 'spotty_thruster': str(discord.utils.get(
                     atomic_frontier.emojis, id=871842514213142598)),
+                'spotty_thruster_rev': str(discord.utils.get(
+                    atomic_frontier.emojis, id=875529093729357855)),
             }
-            ROCKET_MESSAGE = "{}{}{}{}{}{}{}".format(
+            ROCKET = "{}{}{}{}{}{}{}".format(
                 EMOJIS['spotty_fire'],
                 EMOJIS['spotty_thruster'],
                 EMOJIS['spotty3'],
@@ -98,13 +93,28 @@ class BottyG(discord.Client):
                 EMOJIS['spotty3'],
                 EMOJIS['spotty4'],
                 EMOJIS['spotty_nose_cone'])
+            ROCKET_REV = "{}{}{}{}{}{}{}".format(
+                EMOJIS['spotty_nose_cone_rev'],
+                EMOJIS['spotty4'],
+                EMOJIS['spotty3'],
+                EMOJIS['spotty4'],
+                EMOJIS['spotty3'],
+                EMOJIS['spotty_thruster_rev'],
+                EMOJIS['spotty_fire'])
             ROCKET_NOSE = EMOJIS['spotty_nose_cone']
+            ROCKET_NOSE_REV = EMOJIS['spotty_nose_cone']
             ROCKET_THRUST = "{}{}".format(
                 EMOJIS['spotty_fire'],
                 EMOJIS['spotty_thruster'])
+            ROCKET_THRUST_REV = "{}{}".format(
+                EMOJIS['spotty_thruster_rev'],
+                EMOJIS['spotty_fire'])
             ROCKET_BODY = "{}{}".format(
                 EMOJIS['spotty3'],
                 EMOJIS['spotty4'])
+            ROCKET_BODY_REV = "{}{}".format(
+                EMOJIS['spotty4'],
+                EMOJIS['spotty3'])
 
     async def on_message(self, message):
         msg = message.content.lower()
@@ -114,20 +124,6 @@ class BottyG(discord.Client):
             logger.info('We sent this message!')
             return
 
-        # if msg.startswith('!debug_rocket'):
-        #     logger.info('Sending debug rocket: {}'.format(RBP_ROCKET))
-        #     await message.channel.send(RBP_ROCKET)
-        #
-        # if msg.startswith('!debug_payload'):
-        #     logger.info('Sending debug payload')
-        #     payload = message.content[14:]
-        #     await message.channel.send(
-        #         '{} {} {}'.format(RBP_ROCKET, payload, RBP_EMOJI))
-        #
-        # if msg.find('H5XGD54XI4N18LVTR8M594DRT2JNMOW5'.lower()) != -1:
-        #     logger.info('Sending debug reaction')
-        #     await message.add_reaction(RBP_EMOJI)
-
         if re.match(r'^!ro{1,3}cket', msg):
             logger.info('Sending rocket')
             rocket = ROCKET_THRUST
@@ -135,7 +131,7 @@ class BottyG(discord.Client):
             for _ in range(msg[:stop]).count('o'):
               rocket += ROCKET_BODY
             rocket += ROCKET_NOSE
-            await message.channel.send(ROCKET_MESSAGE)
+            await message.channel.send(rocket)
 
         if (msg.find('bobby g') != -1 or
             msg.find('goddard') != -1):
@@ -153,6 +149,10 @@ class BottyG(discord.Client):
             logger.info('Sending advice.')
             rand_num = random.randint(0, len(QUOTES))
             await message.channel.send(QUOTES[rand_num])
+
+        if msg.startswith('!crash'):
+            logger.info('Sending crash.')
+            await message.channel.send("{}💥{}".format(ROCKET, ROCKET_REV))
 
         if msg.startswith('!baguette'):
             logger.info('Sending baguette.')
