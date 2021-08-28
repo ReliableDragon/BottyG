@@ -111,6 +111,7 @@ class BottyG(discord.Client):
             ROCKET_BODY_REV = "{}{}".format(
                 EMOJIS['spotty4'],
                 EMOJIS['spotty3'])
+            logger.info('All emojis loaded!')
 
     async def on_message(self, message):
         msg = message.content.lower()
