@@ -274,8 +274,8 @@ class BottyG(discord.Client):
         # Reaction images
         for key in GIFS:
           if msg.startswith(key):
-              logger.info('Reacting to {}.'.format(key))
-              await message.add_reaction(GIFS[key])
+              logger.info('Sending reaction image for {}.'.format(key))
+              await message.channel.send(GIFS[key])
 
 
 client = BottyG()
