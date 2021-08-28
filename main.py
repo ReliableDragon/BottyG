@@ -67,32 +67,32 @@ class BottyG(discord.Client):
         if atomic_frontier != None:
             logger.info('Loaded Atomic Frontier data!')
             EMOJIS = {
-                'bobby_g': discord.utils.get(
-                    atomic_frontier.emojis, id=875428431133810740),
-                'spotty2': discord.utils.get(
-                    atomic_frontier.emojis, id=868858506776817675),
-                'spotty3': discord.utils.get(
-                    atomic_frontier.emojis, id=868858496257515520),
-                'spotty_fire': discord.utils.get(
-                    atomic_frontier.emojis, id=868858516687958126),
-                'spotty_nose_cone': discord.utils.get(
-                    atomic_frontier.emojis, id=868858516687958126),
-                'spotty_thruster': discord.utils.get(
-                    atomic_frontier.emojis, id=871842514213142598),
+                'bobby_g': str(discord.utils.get(
+                    atomic_frontier.emojis, id=875428431133810740)),
+                'spotty2': str(discord.utils.get(
+                    atomic_frontier.emojis, id=868858506776817675)),
+                'spotty3': str(discord.utils.get(
+                    atomic_frontier.emojis, id=868858496257515520)),
+                'spotty_fire': str(discord.utils.get(
+                    atomic_frontier.emojis, id=868858516687958126)),
+                'spotty_nose_cone': str(discord.utils.get(
+                    atomic_frontier.emojis, id=868858516687958126)),
+                'spotty_thruster': str(discord.utils.get(
+                    atomic_frontier.emojis, id=871842514213142598)),
             }
             ROCKET_MESSAGE = "{} {} {} {} {} {} {}".format(
-                {EMOJIS['spotty_fire']},
-                {EMOJIS['spotty_thruster']},
-                {EMOJIS['spotty2']},
-                {EMOJIS['spotty3']},
-                {EMOJIS['spotty2']},
-                {EMOJIS['spotty3']},
-                {EMOJIS['spotty_nose_cone']})
+                EMOJIS['spotty_fire'],
+                EMOJIS['spotty_thruster'],
+                EMOJIS['spotty2'],
+                EMOJIS['spotty3'],
+                EMOJIS['spotty2'],
+                EMOJIS['spotty3'],
+                EMOJIS['spotty_nose_cone']})
             ROCKET_BASE = "{} {} {} {}".format(
-                {EMOJIS['spotty_fire']},
-                {EMOJIS['spotty_thruster']},
-                {EMOJIS['spotty2']},
-                {EMOJIS['spotty3']})
+                EMOJIS['spotty_fire'],
+                EMOJIS['spotty_thruster'],
+                EMOJIS['spotty2'],
+                EMOJIS['spotty3'])
 
     async def on_message(self, message):
         msg = message.content.lower()
