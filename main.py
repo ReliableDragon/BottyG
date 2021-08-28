@@ -29,6 +29,8 @@ QUOTES = (
 )
 
 BAGUETTE_CLIP = "https://cdn.discordapp.com/attachments/875464533362216960/880994913918013500/this_baguette.mp4"
+SAND_CLIP = "https://cdn.discordapp.com/attachments/800703974205685790/820105727707447336/sandful_of_hand.mp4"
+
 EMOJIS = defaultdict(lambda: 'Failed to load Atomic Frontier emojis!')
 ROCKET_MESSAGE = "Emojis failed to load!"
 ROCKET_NOSE = "Emojis failed to load!"
@@ -155,6 +157,10 @@ class BottyG(discord.Client):
         if msg.startswith('!baguette'):
             logger.info('Sending baguette.')
             await message.channel.send(BAGUETTE_CLIP)
+
+        if msg.startswith('!snacktime'):
+            logger.info('Sending sand.')
+            await message.channel.send(SAND_CLIP)
 
 
 client = BottyG()
