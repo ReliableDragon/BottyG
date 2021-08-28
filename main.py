@@ -90,13 +90,9 @@ class BottyG(discord.Client):
                 EMOJIS['spotty_thruster'],
                 EMOJIS['spotty3'],
                 EMOJIS['spotty4'],
-                EMOJIS['spotty3'],
-                EMOJIS['spotty4'],
                 EMOJIS['spotty_nose_cone'])
             ROCKET_REV = "{}{}{}{}{}{}{}".format(
                 EMOJIS['spotty_nose_cone_rev'],
-                EMOJIS['spotty4'],
-                EMOJIS['spotty3'],
                 EMOJIS['spotty4'],
                 EMOJIS['spotty3'],
                 EMOJIS['spotty_thruster_rev'],
@@ -124,10 +120,11 @@ class BottyG(discord.Client):
             logger.info('We sent this message!')
             return
 
-        if re.match(r'^!ro{1,3}cket', msg):
+        if re.match(r'^!ro{0,3}cket', msg):
             logger.info('Sending rocket')
             rocket = ROCKET_THRUST
             stop = msg.find('cket')
+            rocket += ROCKET_BODY
             for _ in range(msg[:stop]).count('o'):
               rocket += ROCKET_BODY
             rocket += ROCKET_NOSE
