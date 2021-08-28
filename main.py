@@ -26,6 +26,10 @@ QUOTES = (
     'The only barrier to human development is ignorance, and this is not insurmountable.',
     'Set goals, challenge yourself, and achieve them. Live a healthy life ... and make every moment count. Rise above the obstacles, and focus on the positive.',
     'Every vision is a joke until the first man accomplishes it; once realized, it becomes commonplace.',
+    'Failure crowns enterprise.',
+    'Just as in the sciences we have learned that we are too ignorant to safely pronounce anything impossible, so for the individual, since we cannot know just what are his limitations, we can hardly say with certainty that anything is necessarily within or beyond his grasp.',
+    'Each must remember that no one can predict to what heights of wealth, fame, or usefulness he may rise until he has honestly endeavored.',
+    'It has often proved true that the dream of yesterday is the hope of today and the reality of tomorrow.'
 )
 
 BAGUETTE_CLIP = "https://cdn.discordapp.com/attachments/875464533362216960/880994913918013500/this_baguette.mp4"
@@ -121,7 +125,7 @@ class BottyG(discord.Client):
             logger.info('We sent this message!')
             return
 
-        if re.match(r'^!ro{0,3}cket', msg):
+        elif re.match(r'^!ro{0,3}cket', msg):
             logger.info('Sending rocket')
             rocket = ROCKET_THRUST
             stop = msg.find('cket')
@@ -131,35 +135,112 @@ class BottyG(discord.Client):
             rocket += ROCKET_NOSE
             await message.channel.send(rocket)
 
-        if (msg.find('bobby g') != -1 or
-            msg.find('goddard') != -1):
+        elif re.match(r'^!ro{4,}cket', msg):
+          rocket = ROCKET_THRUST
+          rocket += ROCKET_BODY
+          rocket += '💥  💥'
+          rocket += ROCKET_BODY
+          rocket += ROCKET_NOSE
+          await message.channel.send(rocket)
+          await message.channel.send('Oh the humanity!')
+
+        elif ('bobby g' in msg or
+              'goddard' in msg):
             logger.info('Sending bobby g')
             await message.add_reaction(EMOJIS['bobby_g'])
 
-        if msg.startswith('!payload'):
+        elif msg.startswith('!payload'):
             payload = message.content[8:].strip()
             logger.info('Sending rocket with payload: {}'.format(payload))
             await message.channel.send(
-                '{}{}{}{}'.format(
+                '{}{}{}{}{}'.format(
                     ROCKET_THRUST, ROCKET_BODY, payload, ROCKET_NOSE))
 
-        if msg.startswith('!advice'):
+        elif msg.startswith('!crash'):
+            logger.info('Sending crash.')
+            await message.channel.send("{}💥{}".format(ROCKET, ROCKET_REV))
+
+        elif msg.startswith('!advice'):
             logger.info('Sending advice.')
             rand_num = random.randint(0, len(QUOTES))
             await message.channel.send(QUOTES[rand_num])
 
-        if msg.startswith('!crash'):
-            logger.info('Sending crash.')
-            await message.channel.send("{}💥{}".format(ROCKET, ROCKET_REV))
+        # Rocket mashups
+        elif re.match(r'^!(?:ro|or|ck|kc|et|te){2,5}', msg):
+          logger.info('Sending wonky rocket: {}'.format(msg[:11]))
+          rocket_map = {
+            'ro': ROCKET_THRUST,
+            'or': ROCKET_THRUST_REV,
+            'ck': ROCKET_BODY,
+            'kc': ROCKET_BODY_REV,
+            'et': ROCKET_NOSE,
+            'te': ROCKET_NOSE_REV
+          }
+          i = 1
+          wonky_rocket = ''
+          while msg[i:i+2] in rocket_map:
+            wonky_rocket += rocket_map[msg[i:i+2]]
+            i += 2
+          await message.channel.send(wonky_rocket)
 
-        if msg.startswith('!baguette'):
+        # Clips
+        elif msg.startswith('!baguette'):
             logger.info('Sending baguette.')
             await message.channel.send(BAGUETTE_CLIP)
 
-        if msg.startswith('!snacktime'):
+        elif msg.startswith('!snacktime'):
             logger.info('Sending sand.')
             await message.channel.send(SAND_CLIP)
 
+        # Historical reactions
+        elif 'rocket' in msg:
+            logger.info('Reacting to rocket.')
+            await message.add_reaction('🚀')
+
+        elif ('worcester polytechnic' in msg or
+              'clark university' in msg):
+            logger.info('Reacting to alma mater.')
+            await message.add_reaction('🎓')
+
+        elif ('worcester' in msg or
+              'massachusetts' in msg):
+            logger.info('Reacting to home.')
+            await message.add_reaction('🏠')
+
+        elif ('space' in msg or
+              'astronomy' in msg or
+              'mars' in msg):
+            logger.info('Reacting to the stars.')
+            await message.add_reaction('🔭')
+
+        elif ('war of the worlds' in msg):
+            logger.info('Reacting to favorite book.')
+            await message.add_reaction('📖')
+
+        elif ('sigma alpha epsilon' in msg):
+            logger.info('Reacting to fraternity.')
+            await message.add_reaction('🇬🇷')
+
+        elif ('tuberculosis' in msg):
+            logger.info('Reacting to illness.')
+            await message.add_reaction('🤒')
+
+        # Goddard invented the precursor to the bazooka!
+        elif ('bazooka' in msg):
+            logger.info('Reacting to bazooka.')
+            await message.add_reaction('🔫')
+
+        elif ('lindbergh' in msg):
+            logger.info('Reacting to friend.')
+            await message.add_reaction('✈️')
+
+        elif ('roswell' in msg):
+            logger.info('Reacting to roswell.')
+            await message.add_reaction('👽')
+
+        elif ('esther' in msg):
+            logger.info('Reacting to wife.')
+            await message.add_reaction('💍')
 
 client = BottyG()
 client.run(TOKEN)
