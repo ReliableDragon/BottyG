@@ -36,6 +36,13 @@ BAGUETTE_CLIP = "https://cdn.discordapp.com/attachments/875464533362216960/88099
 SAND_CLIP = "https://cdn.discordapp.com/attachments/800703974205685790/820105727707447336/sandful_of_hand.mp4"
 DANCE_CLIP = "https://cdn.discordapp.com/attachments/800703974205685790/830025367325900800/Go-James-Go.gif"
 
+NOPE_GIF = "https://tenor.com/view/simpsons-bart-simpson-grampa-simpson-old-man-hi-bye-gif-8390063"
+SYNAPSID_PIC = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Leonid_Brezhnev_and_Richard_Nixon_talks_in_1973.png/1600px-Leonid_Brezhnev_and_Richard_Nixon_talks_in_1973.png"
+TIME_ZONES_GIF = "https://tenor.com/view/time-zones-wp-fairly-oddparents-gif-21690567"
+BLINK_GIF = "https://tenor.com/view/umm-confused-blinking-okay-white-guy-blinking-gif-7513882"
+PERFECT_GIF = "https://tenor.com/view/pacha-perfect-emperors-new-groove-very-good-gif-5346522"
+AERODYNAMIC_COW_GIF = "https://tenor.com/view/cow-airflow-diagram-vectors-aerodynamics-gif-4785226"
+
 EMOJIS = defaultdict(lambda: 'Failed to load Atomic Frontier emojis!')
 ROCKET = "Emojis failed to load!"
 ROCKET_REV = "Emojis failed to load!"
@@ -45,6 +52,15 @@ ROCKET_THRUST = "Emojis failed to load!"
 ROCKET_THRUST_REV = "Emojis failed to load!"
 ROCKET_BODY = "Emojis failed to load!"
 ROCKET_BODY_REV = "Emojis failed to load!"
+
+GIFS = {
+    "!nope": NOPE_GIF,
+    "!synapsid": SYNAPSID_PIC,
+    "!timezones": TIME_ZONES_GIF,
+    "!confusion": BLINK_GIF,
+    "!perfection": PERFECT_GIF,
+    "!cow": AERODYNAMIC_COW_GIF,
+}
 
 intents = discord.Intents.none()
 intents.messages = True
@@ -89,6 +105,8 @@ class BottyG(discord.Client):
                     atomic_frontier.emojis, id=871842514213142598)),
                 'spotty_thruster_rev': str(discord.utils.get(
                     atomic_frontier.emojis, id=875529093729357855)),
+                'stinky_fish': str(discord.utils.get(
+                    atomic_frontier.emojis, id=879257588225679390)),
             }
             ROCKET = "{}{}{}{}{}".format(
                 EMOJIS['spotty_fire'],
@@ -126,6 +144,7 @@ class BottyG(discord.Client):
             logger.info('We sent this message!')
             return
 
+        # Bot commands
         elif re.match(r'^!ro{0,3}cket', msg):
             logger.info('Sending rocket')
             rocket = ROCKET_THRUST
@@ -145,11 +164,6 @@ class BottyG(discord.Client):
           await message.channel.send(rocket)
           await message.channel.send('Oh the humanity!')
 
-        elif ('bobby g' in msg or
-              'goddard' in msg):
-            logger.info('Sending bobby g')
-            await message.add_reaction(EMOJIS['bobby_g'])
-
         elif msg.startswith('!payload'):
             payload = message.content[8:].strip()
             logger.info('Sending rocket with payload: {}'.format(payload))
@@ -161,7 +175,7 @@ class BottyG(discord.Client):
             logger.info('Sending crash.')
             await message.channel.send("{}💥{}".format(ROCKET, ROCKET_REV))
 
-        elif msg.startswith('!advice'):
+        elif msg.startswith('!advice') or msg.startswith('!quote'):
             logger.info('Sending advice.')
             rand_num = random.randint(0, len(QUOTES))
             await message.channel.send(QUOTES[rand_num])
@@ -198,6 +212,11 @@ class BottyG(discord.Client):
             await message.channel.send(DANCE_CLIP)
 
         # Historical reactions
+        elif ('bobby g' in msg or
+              'goddard' in msg):
+            logger.info('Sending bobby g')
+            await message.add_reaction(EMOJIS['bobby_g'])
+
         elif 'rocket' in msg and not msg.startswith('!'):
             logger.info('Reacting to rocket.')
             await message.add_reaction('🚀')
@@ -246,6 +265,18 @@ class BottyG(discord.Client):
         if ('esther' in msg):
             logger.info('Reacting to wife.')
             await message.add_reaction('💍')
+
+        # Silly nonsense reactions
+        if ('surstromming' in msg):
+            logger.info('Reacting to stinky fish.')
+            await message.add_reaction(EMOJIS['stinky_fish'])
+
+        # Reaction images
+        for key in GIFS:
+          if msg.startswith(key):
+              logger.info('Reacting to {}.'.format(key))
+              await message.add_reaction(GIFS[key])
+
 
 client = BottyG()
 client.run(TOKEN)
