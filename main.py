@@ -277,6 +277,12 @@ class BottyG(discord.Client):
               logger.info('Sending reaction image for {}.'.format(key))
               await message.channel.send(GIFS[key])
 
+        # Help text
+        if msg.startswith('!help') or msg.startswith('!commands'):
+            logger.info('Sending command list.')
+            await message.channel.send('https://pastebin.com/BrKtPP3w')
+
+
 
 client = BottyG()
 client.run(TOKEN)
