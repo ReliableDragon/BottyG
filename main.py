@@ -51,12 +51,12 @@ class BottyG(discord.Client):
         global EMOJIS
         global ROCKET
         global ROCKET_REV
+        global ROCKET_NOSE
+        global ROCKET_NOSE_REV
         global ROCKET_THRUST
         global ROCKET_THRUST_REV
         global ROCKET_BODY
         global ROCKET_BODY_REV
-        global ROCKET_NOSE
-        global ROCKET_NOSE_REV
 
         logger.info('Logged in as')
         logger.info(self.user.name)
@@ -85,13 +85,13 @@ class BottyG(discord.Client):
                 'spotty_thruster_rev': str(discord.utils.get(
                     atomic_frontier.emojis, id=875529093729357855)),
             }
-            ROCKET = "{}{}{}{}{}{}{}".format(
+            ROCKET = "{}{}{}{}{}".format(
                 EMOJIS['spotty_fire'],
                 EMOJIS['spotty_thruster'],
                 EMOJIS['spotty3'],
                 EMOJIS['spotty4'],
                 EMOJIS['spotty_nose_cone'])
-            ROCKET_REV = "{}{}{}{}{}{}{}".format(
+            ROCKET_REV = "{}{}{}{}{}".format(
                 EMOJIS['spotty_nose_cone_rev'],
                 EMOJIS['spotty4'],
                 EMOJIS['spotty3'],
@@ -126,7 +126,7 @@ class BottyG(discord.Client):
             rocket = ROCKET_THRUST
             stop = msg.find('cket')
             rocket += ROCKET_BODY
-            for _ in range(len(msg[:stop].count('o'))):
+            for _ in range(msg[:stop].count('o')):
               rocket += ROCKET_BODY
             rocket += ROCKET_NOSE
             await message.channel.send(rocket)
