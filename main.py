@@ -1,6 +1,8 @@
 import discord
 import random
 import logging
+import re
+
 from logging.handlers import RotatingFileHandler
 from collections import defaultdict
 
@@ -28,8 +30,10 @@ QUOTES = (
 
 BAGUETTE_CLIP = "https://cdn.discordapp.com/attachments/875464533362216960/880994913918013500/this_baguette.mp4"
 EMOJIS = defaultdict(lambda: 'Failed to load Atomic Frontier emojis!')
-ROCKET_MESSAGE = "Rocket failed to load!"
-ROCKET_BASE = "Rocket base failed to load!"
+ROCKET_MESSAGE = "Emojis failed to load!"
+ROCKET_NOSE = "Emojis failed to load!"
+ROCKET_THRUST = "Emojis failed to load!"
+ROCKET_BODY = "Emojis failed to load!"
 # RBP_ROCKET = "RBP rocket failed to load!"
 # RBP_EMOJI = "RBP emoji failed to load!"
 
@@ -45,6 +49,9 @@ class BottyG(discord.Client):
         global EMOJIS
         global ROCKET_MESSAGE
         global ROCKET_BASE
+        global ROCKET_THRUST
+        global ROCKET_BODY
+        global ROCKET_NOSE
 
         logger.info('Logged in as')
         logger.info(self.user.name)
@@ -89,9 +96,11 @@ class BottyG(discord.Client):
                 EMOJIS['spotty3'],
                 EMOJIS['spotty4'],
                 EMOJIS['spotty_nose_cone'])
-            ROCKET_BASE = "{}{}{}{}".format(
+            ROCKET_NOSE = EMOJIS['spotty_nose_cone']
+            ROCKET_THRUST = "{}{}".format(
                 EMOJIS['spotty_fire'],
-                EMOJIS['spotty_thruster'],
+                EMOJIS['spotty_thruster'])
+            ROCKET_BODY = "{}{}".format(
                 EMOJIS['spotty3'],
                 EMOJIS['spotty4'])
 
@@ -117,7 +126,12 @@ class BottyG(discord.Client):
         #     logger.info('Sending debug reaction')
         #     await message.add_reaction(RBP_EMOJI)
 
-        if msg.startswith('!rocket'):
+        if re.match('^!ro{1,3}cket', msg):
+            rocket = ROCKET_THRUST
+            stop = msg.find('cket')
+            for _ in range(msg[:stop]):
+              rocket += ROCKET_BODY
+            rocket += ROCKET_NOSE
             logger.info('Sending rocket')
             await message.channel.send(ROCKET_MESSAGE)
 
@@ -130,8 +144,8 @@ class BottyG(discord.Client):
             payload = message.content[8:].strip()
             logger.info('Sending rocket with payload: {}'.format(payload))
             await message.channel.send(
-                '{}{}{}'.format(
-                    ROCKET_BASE, payload, EMOJIS["spotty_nose_cone"]))
+                '{}{}{}{}'.format(
+                    ROCKET_THRUST, ROCKET_BODY, payload, ROCKET_NOSE))
 
         if msg.startswith('!advice'):
             logger.info('Sending advice.')
