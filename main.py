@@ -34,6 +34,7 @@ QUOTES = (
 
 BAGUETTE_CLIP = "https://cdn.discordapp.com/attachments/875464533362216960/880994913918013500/this_baguette.mp4"
 SAND_CLIP = "https://cdn.discordapp.com/attachments/800703974205685790/820105727707447336/sandful_of_hand.mp4"
+DANCE_CLIP = "https://cdn.discordapp.com/attachments/800703974205685790/830025367325900800/Go-James-Go.gif"
 
 EMOJIS = defaultdict(lambda: 'Failed to load Atomic Frontier emojis!')
 ROCKET = "Emojis failed to load!"
@@ -102,7 +103,7 @@ class BottyG(discord.Client):
                 EMOJIS['spotty_thruster_rev'],
                 EMOJIS['spotty_fire'])
             ROCKET_NOSE = EMOJIS['spotty_nose_cone']
-            ROCKET_NOSE_REV = EMOJIS['spotty_nose_cone']
+            ROCKET_NOSE_REV = EMOJIS['spotty_nose_cone_rev']
             ROCKET_THRUST = "{}{}".format(
                 EMOJIS['spotty_fire'],
                 EMOJIS['spotty_thruster'])
@@ -125,7 +126,7 @@ class BottyG(discord.Client):
             logger.info('We sent this message!')
             return
 
-        elif re.match(r'^!ro{0,3}cket', msg):
+        elif re.match(r'^!ro{0,4}cket', msg):
             logger.info('Sending rocket')
             rocket = ROCKET_THRUST
             stop = msg.find('cket')
@@ -135,7 +136,7 @@ class BottyG(discord.Client):
             rocket += ROCKET_NOSE
             await message.channel.send(rocket)
 
-        elif re.match(r'^!ro{4,}cket', msg):
+        elif re.match(r'^!ro{5,}cket', msg):
           rocket = ROCKET_THRUST
           rocket += ROCKET_BODY
           rocket += '💥  💥'
@@ -192,53 +193,57 @@ class BottyG(discord.Client):
             logger.info('Sending sand.')
             await message.channel.send(SAND_CLIP)
 
+        elif msg.startswith('!danceparty'):
+            logger.info('Sending dancer.')
+            await message.channel.send(DANCE_CLIP)
+
         # Historical reactions
-        elif 'rocket' in msg:
+        elif 'rocket' in msg and not msg.startswith('!'):
             logger.info('Reacting to rocket.')
             await message.add_reaction('🚀')
 
-        elif ('worcester polytechnic' in msg or
+        if ('worcester polytechnic' in msg or
               'clark university' in msg):
             logger.info('Reacting to alma mater.')
             await message.add_reaction('🎓')
 
-        elif ('worcester' in msg or
+        if ('worcester' in msg or
               'massachusetts' in msg):
             logger.info('Reacting to home.')
             await message.add_reaction('🏠')
 
-        elif ('space' in msg or
+        if ('space' in msg or
               'astronomy' in msg or
               'mars' in msg):
             logger.info('Reacting to the stars.')
             await message.add_reaction('🔭')
 
-        elif ('war of the worlds' in msg):
+        if ('war of the worlds' in msg):
             logger.info('Reacting to favorite book.')
             await message.add_reaction('📖')
 
-        elif ('sigma alpha epsilon' in msg):
+        if ('sigma alpha epsilon' in msg):
             logger.info('Reacting to fraternity.')
             await message.add_reaction('🇬🇷')
 
-        elif ('tuberculosis' in msg):
+        if ('tuberculosis' in msg):
             logger.info('Reacting to illness.')
             await message.add_reaction('🤒')
 
         # Goddard invented the precursor to the bazooka!
-        elif ('bazooka' in msg):
+        if ('bazooka' in msg):
             logger.info('Reacting to bazooka.')
             await message.add_reaction('🔫')
 
-        elif ('lindbergh' in msg):
+        if ('lindbergh' in msg):
             logger.info('Reacting to friend.')
             await message.add_reaction('✈️')
 
-        elif ('roswell' in msg):
+        if ('roswell' in msg):
             logger.info('Reacting to roswell.')
             await message.add_reaction('👽')
 
-        elif ('esther' in msg):
+        if ('esther' in msg):
             logger.info('Reacting to wife.')
             await message.add_reaction('💍')
 
