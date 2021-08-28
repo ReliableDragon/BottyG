@@ -69,7 +69,7 @@ class BottyG(discord.Client):
             EMOJIS = {
                 'bobby_g': str(discord.utils.get(
                     atomic_frontier.emojis, id=875428431133810740)),
-                'spotty2': str(discord.utils.get(
+                'spotty4': str(discord.utils.get(
                     atomic_frontier.emojis, id=868858506776817675)),
                 'spotty3': str(discord.utils.get(
                     atomic_frontier.emojis, id=868858496257515520)),
@@ -80,19 +80,19 @@ class BottyG(discord.Client):
                 'spotty_thruster': str(discord.utils.get(
                     atomic_frontier.emojis, id=871842514213142598)),
             }
-            ROCKET_MESSAGE = "{} {} {} {} {} {} {}".format(
+            ROCKET_MESSAGE = "{}{}{}{}{}{}{}".format(
                 EMOJIS['spotty_fire'],
                 EMOJIS['spotty_thruster'],
-                EMOJIS['spotty2'],
                 EMOJIS['spotty3'],
-                EMOJIS['spotty2'],
+                EMOJIS['spotty4'],
                 EMOJIS['spotty3'],
+                EMOJIS['spotty4'],
                 EMOJIS['spotty_nose_cone'])
-            ROCKET_BASE = "{} {} {} {}".format(
+            ROCKET_BASE = "{}{}{}{}".format(
                 EMOJIS['spotty_fire'],
                 EMOJIS['spotty_thruster'],
-                EMOJIS['spotty2'],
-                EMOJIS['spotty3'])
+                EMOJIS['spotty3'],
+                EMOJIS['spotty4'])
 
     async def on_message(self, message):
         msg = message.content.lower()
@@ -129,7 +129,7 @@ class BottyG(discord.Client):
             payload = message.content[9:]
             logger.info('Sending rocket with payload: {}'.format(payload))
             await message.channel.send(
-                '{} {} {}'.format(
+                '{}{}{}'.format(
                     ROCKET_BASE, payload, EMOJIS["spotty_nose_cone"]))
 
         if msg.startswith('!advice'):
