@@ -126,7 +126,7 @@ class BottyG(discord.Client):
             logger.info('We sent this message!')
             return
 
-        elif re.match(r'^!ro{0,4}cket', msg):
+        elif re.match(r'^!ro{0,3}cket', msg):
             logger.info('Sending rocket')
             rocket = ROCKET_THRUST
             stop = msg.find('cket')
@@ -136,7 +136,7 @@ class BottyG(discord.Client):
             rocket += ROCKET_NOSE
             await message.channel.send(rocket)
 
-        elif re.match(r'^!ro{5,}cket', msg):
+        elif re.match(r'^!ro{4,}cket', msg):
           rocket = ROCKET_THRUST
           rocket += ROCKET_BODY
           rocket += '💥  💥'
