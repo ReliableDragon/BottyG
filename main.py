@@ -26,6 +26,7 @@ QUOTES = (
     'Every vision is a joke until the first man accomplishes it; once realized, it becomes commonplace.',
 )
 
+BAGUETTE_CLIP = "https://cdn.discordapp.com/attachments/875464533362216960/880994913918013500/this_baguette.mp4"
 EMOJIS = defaultdict(lambda: 'Failed to load Atomic Frontier emojis!')
 ROCKET_MESSAGE = "Rocket failed to load!"
 ROCKET_BASE = "Rocket base failed to load!"
@@ -126,7 +127,7 @@ class BottyG(discord.Client):
             await message.add_reaction(EMOJIS['bobby_g'])
 
         if msg.startswith('!payload'):
-            payload = message.content[9:]
+            payload = message.content[8:].strip()
             logger.info('Sending rocket with payload: {}'.format(payload))
             await message.channel.send(
                 '{}{}{}'.format(
@@ -136,6 +137,10 @@ class BottyG(discord.Client):
             logger.info('Sending advice.')
             rand_num = random.randint(0, len(QUOTES))
             await message.channel.send(QUOTES[rand_num])
+
+        if msg.startswith('!baguette'):
+            logger.info('Sending baguette.')
+            await message.channel.send(BAGUETTE_CLIP)
 
 
 client = BottyG()
