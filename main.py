@@ -178,7 +178,7 @@ class BottyG(discord.Client):
           }
           i = 1
           wonky_rocket = ''
-          while msg[i:i+2] in rocket_map:
+          while i < len(msg) and msg[i:i+2] in rocket_map:
             wonky_rocket += rocket_map[msg[i:i+2]]
             i += 2
           await message.channel.send(wonky_rocket)
