@@ -128,13 +128,13 @@ class BottyG(discord.Client):
         #     logger.info('Sending debug reaction')
         #     await message.add_reaction(RBP_EMOJI)
 
-        if re.match('^!ro{1,3}cket', msg):
+        if re.match(r'^!ro{1,3}cket', msg):
+            logger.info('Sending rocket')
             rocket = ROCKET_THRUST
             stop = msg.find('cket')
-            for _ in range(msg[:stop]):
+            for _ in range(msg[:stop]).count('o'):
               rocket += ROCKET_BODY
             rocket += ROCKET_NOSE
-            logger.info('Sending rocket')
             await message.channel.send(ROCKET_MESSAGE)
 
         if (msg.find('bobby g') != -1 or
