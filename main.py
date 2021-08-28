@@ -1,6 +1,8 @@
 import discord
 import random
+import logging
 
+logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.DEBUG)
 TOKEN = open('token.txt','r').readline()
 
 QUOTES = (
@@ -26,10 +28,10 @@ client = discord.Client(intents = intents)
 
 class BottyG(discord.Client):
     async def on_ready(self):
-        print('Logged in as')
-        print(self.user.name)
-        print(self.user.id)
-        print('------')
+        logging.info('Logged in as')
+        logging.info(self.user.name)
+        logging.info(self.user.id)
+        logging.info('------')
 
         atomic_frontier_id = 800703973890850836
         atomic_frontier = self.get_guild(atomic_frontier_id)
@@ -63,29 +65,30 @@ class BottyG(discord.Client):
             {EMOJIS['spotty3']})
 
     async def on_message(self, message):
-        print('Got a message!')
+        logging.info('Got a message: {}'.format(message))
         msg = message.content.lower()
 
         if message.author == client.user:
             return
 
         if msg.startswith('!rocket'):
-            print('Sending rocket')
+            logging.info('Sending rocket')
             await message.channel.send(ROCKET_MESSAGE)
 
         if (msg.find('bobby g') != -1 or
             msg.find('goddard') != -1):
-            print('Sending bobby g')
+            logging.info('Sending bobby g')
             await message.add_reaction(EMOJIS['bobby_g'])
 
         if msg.startswith('!payload'):
             payload = message.content[9:]
-            print('Sending rocket with payload: {}'.format(payload))
+            logging.info('Sending rocket with payload: {}'.format(payload))
             await message.channel.send(
                 ROCKET_BASE +
                 ' {} {}'.format(payload, EMOJIS["spotty_nose_cone"]))
 
         if msg.startswith('!advice'):
+            logging.info('Sending advice.')
             rand_num = random.randint(0, len(QUOTES))
             await message.channel.send(QUOTES[rand_num])
 
