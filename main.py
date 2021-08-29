@@ -104,9 +104,11 @@ class BottyG(discord.Client):
                 'spotty_thruster': str(discord.utils.get(
                     atomic_frontier.emojis, id=871842514213142598)),
                 'spotty_thruster_rev': str(discord.utils.get(
-                    atomic_frontier.emojis, id=875529093729357855)),
+                    atomic_frontier.emojis, id=875529093729357855)),871742964102205480
                 'stinky_fish': str(discord.utils.get(
                     atomic_frontier.emojis, id=879257588225679390)),
+                'james': str(discord.utils.get(
+                    atomic_frontier.emojis, id=871742964102205480)),
             }
             ROCKET = "{}{}{}{}{}".format(
                 EMOJIS['spotty_fire'],
@@ -168,7 +170,7 @@ class BottyG(discord.Client):
             payload = message.content[8:].strip()
             logger.info('Sending rocket with payload: {}'.format(payload))
             await message.channel.send(
-                '{}{}{}{}{}'.format(
+                '{}{}{}{}'.format(
                     ROCKET_THRUST, ROCKET_BODY, payload, ROCKET_NOSE))
 
         elif msg.startswith('!crash'):
@@ -265,6 +267,10 @@ class BottyG(discord.Client):
         if ('esther' in msg):
             logger.info('Reacting to wife.')
             await message.add_reaction('💍')
+
+        if ('james' in msg):
+            logger.info('Reacting to wife.')
+            await message.add_reaction(EMOJIS['james'])
 
         # Silly nonsense reactions
         if ('surstromming' in msg):
