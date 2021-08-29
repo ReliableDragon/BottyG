@@ -282,10 +282,18 @@ class TestMessageResponses(unittest.TestCase):
     message.channel.send.assert_called_once_with(rocket_msg)
     message.add_reaction.assert_not_called()
 
-  def test_help_sends_pastebin(self):
+  def test_help_sends_help(self):
     commands_msg = botty_g.COMMANDS
     message = self.msg
     message.content = "!help"
+    self.loop.run_until_complete(self.tested.on_message(message))
+    message.channel.send.assert_called_once_with(commands_msg)
+    message.add_reaction.assert_not_called()
+
+  def test_reactions_sends_reactions(self):
+    commands_msg = botty_g.REACTIONS
+    message = self.msg
+    message.content = "!reactions"
     self.loop.run_until_complete(self.tested.on_message(message))
     message.channel.send.assert_called_once_with(commands_msg)
     message.add_reaction.assert_not_called()

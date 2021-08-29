@@ -43,6 +43,7 @@ TIME_ZONES_GIF = "https://tenor.com/view/time-zones-wp-fairly-oddparents-gif-216
 BLINK_GIF = "https://tenor.com/view/umm-confused-blinking-okay-white-guy-blinking-gif-7513882"
 PERFECT_GIF = "https://tenor.com/view/pacha-perfect-emperors-new-groove-very-good-gif-5346522"
 AERODYNAMIC_COW_GIF = "https://tenor.com/view/cow-airflow-diagram-vectors-aerodynamics-gif-4785226"
+CLAP_GIF = "https://tenor.com/view/good-job-clapping-leonardo-dicaprio-bravo-great-gif-7248435"
 
 GIFS = {
     "!nope": NOPE_GIF,
@@ -51,6 +52,7 @@ GIFS = {
     "!confusion": BLINK_GIF,
     "!perfect": PERFECT_GIF,
     "!cow": AERODYNAMIC_COW_GIF,
+    "!clap": CLAP_GIF,
 }
 
 EMOJI_IDS = {
@@ -68,25 +70,29 @@ EMOJI_IDS = {
 
 COMMANDS = """```
 !rocket
-!roocket
-!rooocket
-!rokcteor
-!teorcket
+!roorkcet
 !{ro|or|ck|kc|et|te}...
 !payload
 !crash
 !quote
+!convert TIME_ZONE HH:MM TIME_ZONE...
+More commands:
+!reactions
+```"""
+
+REACTIONS = """```
 !baguette
 !snacktime
-!convert TIME_ZONE HH:MM TIME_ZONE...
+!danceparty
 !synapsid
 !nope
 !timezones
-!danceparty
 !confusion
 !perfection
 !cow
+!clap
 ```"""
+
 
 ZERO_WIDTH_SPACE = "​"
 
@@ -328,6 +334,11 @@ class BottyG(discord.Client):
     if msg.startswith('!help') or msg.startswith('!commands'):
       logger.info('Sending command list.')
       await message.channel.send(COMMANDS)
+
+    # Help text
+    if msg.startswith('!reactions'):
+      logger.info('Sending reaction list.')
+      await message.channel.send(REACTIONS)
 
 
 if __name__ == "__main__":
