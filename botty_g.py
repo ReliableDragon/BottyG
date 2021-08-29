@@ -176,7 +176,7 @@ class BottyG(discord.Client):
       return
 
     # Bot commands
-    elif re.match(r'^!ro{0,3}cket', msg):
+    elif re.match(r'^!ro{0,5}cket', msg):
       logger.info('Sending rocket')
       rocket = ZERO_WIDTH_SPACE
       rocket += self.ROCKET_THRUST
@@ -187,7 +187,7 @@ class BottyG(discord.Client):
       rocket += self.ROCKET_NOSE
       await message.channel.send(rocket)
 
-    elif re.match(r'^!ro{4,}cket', msg):
+    elif re.match(r'^!ro{6,}cket', msg):
       rocket = ZERO_WIDTH_SPACE
       rocket += self.ROCKET_THRUST
       rocket += self.ROCKET_BODY
