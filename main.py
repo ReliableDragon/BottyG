@@ -104,7 +104,7 @@ class BottyG(discord.Client):
                 'spotty_thruster': str(discord.utils.get(
                     atomic_frontier.emojis, id=871842514213142598)),
                 'spotty_thruster_rev': str(discord.utils.get(
-                    atomic_frontier.emojis, id=875529093729357855)),871742964102205480
+                    atomic_frontier.emojis, id=875529093729357855)),
                 'stinky_fish': str(discord.utils.get(
                     atomic_frontier.emojis, id=879257588225679390)),
                 'james': str(discord.utils.get(
