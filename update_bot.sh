@@ -1,4 +1,4 @@
-rm main.py main.py~
-curl -o main.py https://raw.githubusercontent.com/SethBorder/BottyG/main/main.py
-chown botrunner:botrunner main.py
+rm botty_g.py botty_g.py~
+curl -o botty_g.py https://raw.githubusercontent.com/SethBorder/BottyG/main/botty_g.py
+chown botrunner:botrunner botty_g.py
 supervisorctl restart all

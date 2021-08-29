@@ -1,1 +1,1 @@
-botty_g: /bots/botty_g/env/bin/python3 main.py
+botty_g: /bots/botty_g/env/bin/python3 botty_g.py
