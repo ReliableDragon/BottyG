@@ -72,6 +72,7 @@ COMMANDS = """```
 !rooocket
 !rokcteor
 !teorcket
+!{ro|or|ck|kc|et|te}...
 !payload
 !crash
 !quote
