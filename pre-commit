@@ -1,0 +1,7 @@
+if ! python3 -m botty_g_test
+then
+  echo "Tests failed, aborting commit."
+  exit 1
+else
+  echo "Tests are good, proceeding with commit."
+fi
