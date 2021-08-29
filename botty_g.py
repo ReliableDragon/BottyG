@@ -142,9 +142,6 @@ class BottyG(discord.Client):
     msg = message.content.lower()
     logger.info('Got a message: {}'.format(msg))
 
-    logger.info('We are {}'.format(str(self.user)))
-    logger.info('Message is from {}'.format(str(message.author.__repr__())))
-    logger.info('The equivalence of those two things is: {}'.format(message.author == self.user))
     if message.author == self.user:
       logger.info('We sent this message!')
       return
@@ -272,11 +269,15 @@ class BottyG(discord.Client):
       logger.info('Reacting to wife.')
       await message.add_reaction('💍')
 
+    if ('nahum' in msg):
+      logger.info('Reacting to father.')
+      await message.add_reaction('👨‍👦')
+
+    # Silly server related reactions
     if ('james' in msg):
       logger.info('Reacting to james.')
       await message.add_reaction(self.EMOJIS['james'])
 
-    # Silly nonsense reactions
     if ('surstromming' in msg):
       logger.info('Reacting to stinky fish.')
       await message.add_reaction(self.EMOJIS['stinky_fish'])

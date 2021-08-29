@@ -10,6 +10,7 @@ chown -R botrunner:botrunner /bots/botty_g
 apt-get update
 apt-get install -yq git supervisor python python-pip
 pip install --upgrade pip virtualenv
+pip install --upgrade firebase-admin
 
 # Fetch source code
 export HOME=/root

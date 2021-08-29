@@ -312,7 +312,7 @@ class TestMessageResponses(unittest.TestCase):
       "the name esther comes from a jewish woman in the eponymous story of esther, which explains the origins of purim": "💍",
       "the name james was made up by the british so that their kings wouldn't all be named louis like the french": "<871742964102205480>",
       "if someone offers you surstromming it is considered an act of war under international law, and most countries would consider a retalitory strike justified": "<879257588225679390>",
-
+      "father nahum, may i please take the next turn on the butter churn?": "👨‍👦",
     }
     for text, reaction in test_cases.items():
       with self.subTest(msg=text):
