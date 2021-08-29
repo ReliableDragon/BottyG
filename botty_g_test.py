@@ -130,7 +130,7 @@ class TestMessageResponses(unittest.TestCase):
     message.add_reaction.assert_not_called()
 
   def test_rocket_sends_rocket(self):
-    rocket_msg = "<871843033883213914><871842514213142598><868858496257515520><868858506776817675><868858496257515520><868858506776817675><868858516687958126>"
+    rocket_msg = "\u200b<871843033883213914><871842514213142598><868858496257515520><868858506776817675><868858496257515520><868858506776817675><868858516687958126>"
     message = self.msg
     message.content = "!rocket"
     self.loop.run_until_complete(self.tested.on_message(message))
@@ -138,7 +138,7 @@ class TestMessageResponses(unittest.TestCase):
     message.add_reaction.assert_not_called()
 
   def test_upper_case_rocket_sends_rocket(self):
-    rocket_msg = "<871843033883213914><871842514213142598><868858496257515520><868858506776817675><868858496257515520><868858506776817675><868858516687958126>"
+    rocket_msg = "\u200b<871843033883213914><871842514213142598><868858496257515520><868858506776817675><868858496257515520><868858506776817675><868858516687958126>"
     message = self.msg
     message.content = "!ROCKET"
     self.loop.run_until_complete(self.tested.on_message(message))
@@ -146,7 +146,7 @@ class TestMessageResponses(unittest.TestCase):
     message.add_reaction.assert_not_called()
 
   def test_rooocket_sends_long_rocket(self):
-    rocket_msg = "<871843033883213914><871842514213142598><868858496257515520><868858506776817675><868858496257515520><868858506776817675><868858496257515520><868858506776817675><868858496257515520><868858506776817675><868858516687958126>"
+    rocket_msg = "\u200b<871843033883213914><871842514213142598><868858496257515520><868858506776817675><868858496257515520><868858506776817675><868858496257515520><868858506776817675><868858496257515520><868858506776817675><868858516687958126>"
     message = self.msg
     message.content = "!rooocket"
     self.loop.run_until_complete(self.tested.on_message(message))
@@ -154,7 +154,7 @@ class TestMessageResponses(unittest.TestCase):
     message.add_reaction.assert_not_called()
 
   def test_roooocket_sends_rocket_crash(self):
-    rocket_msg = "<871843033883213914><871842514213142598><868858496257515520><868858506776817675>💥  💥<868858496257515520><868858506776817675><868858516687958126>"
+    rocket_msg = "\u200b<871843033883213914><871842514213142598><868858496257515520><868858506776817675>💥  💥<868858496257515520><868858506776817675><868858516687958126>"
     message = self.msg
     message.content = "!roooocket"
     self.loop.run_until_complete(self.tested.on_message(message))
@@ -163,7 +163,7 @@ class TestMessageResponses(unittest.TestCase):
     message.add_reaction.assert_not_called()
 
   def test_payload_sends_payload(self):
-    rocket_msg = "<871843033883213914><871842514213142598><868858496257515520><868858506776817675>🇦🇺<868858516687958126>"
+    rocket_msg = "\u200b<871843033883213914><871842514213142598><868858496257515520><868858506776817675>🇦🇺<868858516687958126>"
     message = self.msg
     message.content = "!payload🇦🇺"
     self.loop.run_until_complete(self.tested.on_message(message))
@@ -171,7 +171,7 @@ class TestMessageResponses(unittest.TestCase):
     message.add_reaction.assert_not_called()
 
   def test_crash_sends_crash(self):
-    rocket_msg = "<871843033883213914><871842514213142598><868858496257515520><868858506776817675><868858516687958126>💥<875529103984431154><868858506776817675><868858496257515520><875529093729357855><871843033883213914>"
+    rocket_msg = "\u200b<871843033883213914><871842514213142598><868858496257515520><868858506776817675><868858516687958126>💥<875529103984431154><868858506776817675><868858496257515520><875529093729357855><871843033883213914>"
     message = self.msg
     message.content = "!crash"
     self.loop.run_until_complete(self.tested.on_message(message))
@@ -188,7 +188,7 @@ class TestMessageResponses(unittest.TestCase):
     message.add_reaction.assert_not_called()
 
   def test_tekcor_sends_reverse_rocket(self):
-    rocket_msg = "<875529103984431154><868858506776817675><868858496257515520><875529093729357855><871843033883213914>"
+    rocket_msg = "\u200b<875529103984431154><868858506776817675><868858496257515520><875529093729357855><871843033883213914>"
     message = self.msg
     message.content = "!tekcor"
     self.loop.run_until_complete(self.tested.on_message(message))
@@ -196,7 +196,7 @@ class TestMessageResponses(unittest.TestCase):
     message.add_reaction.assert_not_called()
 
   def test_roorckette_sends_wonkyrocket(self):
-    rocket_msg = "<871843033883213914><871842514213142598><875529093729357855><871843033883213914><868858496257515520><868858506776817675><868858516687958126><875529103984431154>"
+    rocket_msg = "\u200b<871843033883213914><871842514213142598><875529093729357855><871843033883213914><868858496257515520><868858506776817675><868858516687958126><875529103984431154>"
     message = self.msg
     message.content = "!roorckette"
     self.loop.run_until_complete(self.tested.on_message(message))
@@ -204,7 +204,6 @@ class TestMessageResponses(unittest.TestCase):
     message.add_reaction.assert_not_called()
 
   def test_roorckkeette_is_too_long(self):
-    rocket_msg = "<871843033883213914><871842514213142598><875529093729357855><871843033883213914><868858496257515520><868858506776817675><868858516687958126><875529103984431154>"
     message = self.msg
     message.content = "!roorckkcette"
     self.loop.run_until_complete(self.tested.on_message(message))
@@ -284,11 +283,22 @@ class TestMessageResponses(unittest.TestCase):
     message.add_reaction.assert_not_called()
 
   def test_help_sends_pastebin(self):
-    rocket_msg = "https://pastebin.com/BrKtPP3w"
+    commands_msg = botty_g.COMMANDS
     message = self.msg
     message.content = "!help"
     self.loop.run_until_complete(self.tested.on_message(message))
-    message.channel.send.assert_called_once_with(rocket_msg)
+    message.channel.send.assert_called_once_with(commands_msg)
+    message.add_reaction.assert_not_called()
+
+  def test_time_zone_response(self):
+    time_zone_message = ("23:59 PDT is:\n"
+          "  01:59 EST\n"
+          "  06:59 GMT\n"
+          "  07:59 CET")
+    message = self.msg
+    message.content = "!convert PDT 23:59 EST GMT CET"
+    self.loop.run_until_complete(self.tested.on_message(message))
+    message.channel.send.assert_called_once_with(time_zone_message)
     message.add_reaction.assert_not_called()
 
   def test_reactions(self):

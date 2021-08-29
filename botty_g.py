@@ -5,6 +5,7 @@ import re
 
 from logging.handlers import RotatingFileHandler
 from collections import defaultdict
+from timezone_converter import generate_time_zone_response
 
 my_handler = RotatingFileHandler(
     'botty_g.log', mode='a', maxBytes=5*1024*1024, backupCount=2)
@@ -64,6 +65,27 @@ EMOJI_IDS = {
     'stinky_fish': 879257588225679390,
     'james': 871742964102205480,
 }
+
+COMMANDS = """```
+!rocket
+!roocket
+!rooocket
+!rokcteor
+!teorcket
+!payload
+!crash
+!quote
+!baguette
+!snacktime
+!convert TIME_ZONE HH:MM TIME_ZONE...
+!synapsid
+!nope
+!timezones
+!danceparty
+!confusion
+!perfection
+!cow
+```"""
 
 ZERO_WIDTH_SPACE = "​"
 
@@ -149,7 +171,8 @@ class BottyG(discord.Client):
     # Bot commands
     elif re.match(r'^!ro{0,3}cket', msg):
       logger.info('Sending rocket')
-      rocket = self.ROCKET_THRUST
+      rocket = ZERO_WIDTH_SPACE
+      rocket += self.ROCKET_THRUST
       stop = msg.find('cket')
       rocket += self.ROCKET_BODY
       for _ in range(msg[:stop].count('o')):
@@ -158,7 +181,8 @@ class BottyG(discord.Client):
       await message.channel.send(rocket)
 
     elif re.match(r'^!ro{4,}cket', msg):
-      rocket = self.ROCKET_THRUST
+      rocket = ZERO_WIDTH_SPACE
+      rocket += self.ROCKET_THRUST
       rocket += self.ROCKET_BODY
       rocket += '💥  💥'
       rocket += self.ROCKET_BODY
@@ -170,12 +194,17 @@ class BottyG(discord.Client):
       payload = message.content[8:].strip()
       logger.info('Sending rocket with payload: {}'.format(payload))
       await message.channel.send(
-          '{}{}{}{}'.format(
-              self.ROCKET_THRUST, self.ROCKET_BODY, payload, self.ROCKET_NOSE))
+          '{}{}{}{}{}'.format(
+              ZERO_WIDTH_SPACE,
+              self.ROCKET_THRUST,
+              self.ROCKET_BODY,
+              payload,
+              self.ROCKET_NOSE))
 
     elif msg.startswith('!crash'):
       logger.info('Sending crash.')
-      await message.channel.send("{}💥{}".format(self.ROCKET, self.ROCKET_REV))
+      await message.channel.send("{}{}💥{}".format(
+          ZERO_WIDTH_SPACE, self.ROCKET, self.ROCKET_REV))
 
     elif msg.startswith('!advice') or msg.startswith('!quote'):
       logger.info('Sending advice.')
@@ -194,7 +223,7 @@ class BottyG(discord.Client):
         'te': self.ROCKET_NOSE_REV
       }
       i = 1
-      wonky_rocket = ''
+      wonky_rocket = ZERO_WIDTH_SPACE
       while i < len(msg) and msg[i:i+2] in rocket_map:
         wonky_rocket += rocket_map[msg[i:i+2]]
         i += 2
@@ -288,10 +317,16 @@ class BottyG(discord.Client):
         logger.info('Sending reaction image for {}.'.format(key))
         await message.channel.send(GIFS[key])
 
+    # Timezone conversion
+    time_zone_response = generate_time_zone_response(msg)
+    if time_zone_response != None:
+      logger.info('Responding to time zone conversion request.'.format(key))
+      await message.channel.send(time_zone_response)
+
     # Help text
     if msg.startswith('!help') or msg.startswith('!commands'):
       logger.info('Sending command list.')
-      await message.channel.send('https://pastebin.com/BrKtPP3w')
+      await message.channel.send(COMMANDS)
 
 
 if __name__ == "__main__":
