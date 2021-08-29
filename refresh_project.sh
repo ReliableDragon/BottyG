@@ -1,0 +1,1 @@
+git clone https://github.com/SethBorder/BottyG.git /bots/botty_g
