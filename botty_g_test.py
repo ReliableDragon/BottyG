@@ -17,9 +17,6 @@ logger = logging.getLogger('root')
 logger.setLevel(logging.DEBUG)
 logger.addHandler(my_handler)
 
-# class AsyncMock(MagicMock):
-#     async def __call__(self, *args, **kwargs):
-#         return super(AsyncMock, self).__call__(*args, **kwargs)
 
 class MockUser:
   def __init__(self, name, id):
@@ -54,42 +51,42 @@ class TestEmojiLoading(unittest.TestCase):
 
   def test_rocket(self):
     self.assertEqual(
-        self.tested.ROCKET,
+        self.tested.rocketry.ROCKET,
         "<871843033883213914><871842514213142598><868858496257515520><868858506776817675><868858516687958126>")
 
   def test_rocket_rev(self):
     self.assertEqual(
-        self.tested.ROCKET_REV,
+        self.tested.rocketry.ROCKET_REV,
         "<875529103984431154><868858506776817675><868858496257515520><875529093729357855><871843033883213914>")
 
   def test_rocket_nose(self):
     self.assertEqual(
-        self.tested.ROCKET_NOSE,
+        self.tested.rocketry.ROCKET_NOSE,
         "<868858516687958126>")
 
   def test_rocket_nose_rev(self):
     self.assertEqual(
-        self.tested.ROCKET_NOSE_REV,
+        self.tested.rocketry.ROCKET_NOSE_REV,
         "<875529103984431154>")
 
   def test_rocket_thrust(self):
     self.assertEqual(
-        self.tested.ROCKET_THRUST,
+        self.tested.rocketry.ROCKET_THRUST,
         "<871843033883213914><871842514213142598>")
 
   def test_rocket_thrust_rev(self):
     self.assertEqual(
-        self.tested.ROCKET_THRUST_REV,
+        self.tested.rocketry.ROCKET_THRUST_REV,
         "<875529093729357855><871843033883213914>")
 
   def test_rocket_body(self):
     self.assertEqual(
-        self.tested.ROCKET_BODY,
+        self.tested.rocketry.ROCKET_BODY,
         "<868858496257515520><868858506776817675>")
 
   def test_rocket_body_rev(self):
     self.assertEqual(
-        self.tested.ROCKET_BODY_REV,
+        self.tested.rocketry.ROCKET_BODY_REV,
         "<868858506776817675><868858496257515520>")
 
 

@@ -3,6 +3,7 @@ import random
 import logging
 import re
 import reactions
+import rocket_utils
 
 from logging.handlers import RotatingFileHandler
 from collections import defaultdict
@@ -102,15 +103,6 @@ ZERO_WIDTH_SPACE = "​"
 
 class BottyG(discord.Client):
   EMOJIS = defaultdict(lambda: 'Failed to load Atomic Frontier emojis!')
-  ROCKET = "Emojis failed to load!"
-  ROCKET_REV = "Emojis failed to load!"
-  ROCKET_NOSE = "Emojis failed to load!"
-  ROCKET_NOSE_REV = "Emojis failed to load!"
-  ROCKET_THRUST = "Emojis failed to load!"
-  ROCKET_THRUST_REV = "Emojis failed to load!"
-  ROCKET_BODY = "Emojis failed to load!"
-  ROCKET_BODY_REV = "Emojis failed to load!"
-
 
   def _get_emoji(self, _id):
     return str(discord.utils.get(
@@ -119,8 +111,8 @@ class BottyG(discord.Client):
   def _populate_emojis(self):
     self.EMOJIS = {
         'bobby_g': self._get_emoji(EMOJI_IDS['bobby_g']),
-        'spotty4': self._get_emoji(EMOJI_IDS['spotty4']),
         'spotty3': self._get_emoji(EMOJI_IDS['spotty3']),
+        'spotty4': self._get_emoji(EMOJI_IDS['spotty4']),
         'spotty_fire': self._get_emoji(EMOJI_IDS['spotty_fire']),
         'spotty_nose_cone': self._get_emoji(EMOJI_IDS['spotty_nose_cone']),
         'spotty_nose_cone_rev': self._get_emoji(EMOJI_IDS['spotty_nose_cone_rev']),
@@ -129,34 +121,6 @@ class BottyG(discord.Client):
         'stinky_fish': self._get_emoji(EMOJI_IDS['stinky_fish']),
         'james': self._get_emoji(EMOJI_IDS['james']),
     }
-
-  def _populate_rocket_parts(self):
-    self.ROCKET = "{}{}{}{}{}".format(
-        self.EMOJIS['spotty_fire'],
-        self.EMOJIS['spotty_thruster'],
-        self.EMOJIS['spotty3'],
-        self.EMOJIS['spotty4'],
-        self.EMOJIS['spotty_nose_cone'])
-    self.ROCKET_REV = "{}{}{}{}{}".format(
-        self.EMOJIS['spotty_nose_cone_rev'],
-        self.EMOJIS['spotty4'],
-        self.EMOJIS['spotty3'],
-        self.EMOJIS['spotty_thruster_rev'],
-        self.EMOJIS['spotty_fire'])
-    self.ROCKET_NOSE = self.EMOJIS['spotty_nose_cone']
-    self.ROCKET_NOSE_REV = self.EMOJIS['spotty_nose_cone_rev']
-    self.ROCKET_THRUST = "{}{}".format(
-        self.EMOJIS['spotty_fire'],
-        self.EMOJIS['spotty_thruster'])
-    self.ROCKET_THRUST_REV = "{}{}".format(
-        self.EMOJIS['spotty_thruster_rev'],
-        self.EMOJIS['spotty_fire'])
-    self.ROCKET_BODY = "{}{}".format(
-        self.EMOJIS['spotty3'],
-        self.EMOJIS['spotty4'])
-    self.ROCKET_BODY_REV = "{}{}".format(
-        self.EMOJIS['spotty4'],
-        self.EMOJIS['spotty3'])
 
   async def on_ready(self):
     logger.info('Logged in as')
@@ -175,7 +139,7 @@ class BottyG(discord.Client):
       logger.warning('Failed to load Atomic Frontier data!')
 
     self._populate_emojis()
-    self._populate_rocket_parts()
+    self.rocketry = rocket_utils.RocketGenerator(self.EMOJIS)
     logger.info('All emojis loaded!')
 
   async def on_message(self, message):
@@ -186,67 +150,15 @@ class BottyG(discord.Client):
       logger.info('We sent this message!')
       return
 
-    # Bot commands
-    elif re.match(r'^!ro{0,5}cket', msg):
-      logger.info('Sending rocket')
-      rocket = ZERO_WIDTH_SPACE
-      rocket += self.ROCKET_THRUST
-      stop = msg.find('cket')
-      rocket += self.ROCKET_BODY
-      for _ in range(msg[:stop].count('o')):
-        rocket += self.ROCKET_BODY
-      rocket += self.ROCKET_NOSE
-      await message.channel.send(rocket)
+    # Rocket commands
+    await self.rocketry.gen_rocket_command_responses(message)
 
-    elif re.match(r'^!ro{6,}cket', msg):
-      rocket = ZERO_WIDTH_SPACE
-      rocket += self.ROCKET_THRUST
-      rocket += self.ROCKET_BODY
-      rocket += '💥  💥'
-      rocket += self.ROCKET_BODY
-      rocket += self.ROCKET_NOSE
-      await message.channel.send(rocket)
-      await message.channel.send('Oh the humanity!')
-
-    elif msg.startswith('!payload'):
-      payload = message.content[8:].strip()
-      logger.info('Sending rocket with payload: {}'.format(payload))
-      await message.channel.send(
-          '{}{}{}{}{}'.format(
-              ZERO_WIDTH_SPACE,
-              self.ROCKET_THRUST,
-              self.ROCKET_BODY,
-              payload,
-              self.ROCKET_NOSE))
-
-    elif msg.startswith('!crash'):
-      logger.info('Sending crash.')
-      await message.channel.send("{}{}💥{}".format(
-          ZERO_WIDTH_SPACE, self.ROCKET, self.ROCKET_REV))
-
-    elif msg.startswith('!advice') or msg.startswith('!quote'):
+    if msg.startswith('!advice') or msg.startswith('!quote'):
       logger.info('Sending advice.')
       rand_num = random.randint(0, len(QUOTES))
       await message.channel.send(QUOTES[rand_num])
 
-    # Rocket mashups
-    elif re.match(r'^!(?:ro|or|ck|kc|et|te){2,6}\b', msg):
-      logger.info('Sending wonky rocket: {}'.format(msg[:11]))
-      rocket_map = {
-        'ro': self.ROCKET_THRUST,
-        'or': self.ROCKET_THRUST_REV,
-        'ck': self.ROCKET_BODY,
-        'kc': self.ROCKET_BODY_REV,
-        'et': self.ROCKET_NOSE,
-        'te': self.ROCKET_NOSE_REV
-      }
-      i = 1
-      wonky_rocket = ZERO_WIDTH_SPACE
-      while i < len(msg) and msg[i:i+2] in rocket_map:
-        wonky_rocket += rocket_map[msg[i:i+2]]
-        i += 2
-      await message.channel.send(wonky_rocket)
-
+    # Add reactions
     await reactions.add_reactions(message, self.EMOJIS)
 
     # Reaction images

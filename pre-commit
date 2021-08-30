@@ -1,4 +1,4 @@
-if ! python3 -m botty_g_test
+if ! python3 -m unittest botty_g_test timezone_converter_test reactions_test rocket_utils_test
 then
   echo "Tests failed, aborting commit."
   exit 1
