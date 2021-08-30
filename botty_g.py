@@ -219,7 +219,7 @@ class BottyG(discord.Client):
       await message.channel.send(QUOTES[rand_num])
 
     # Rocket mashups
-    elif re.match(r'^!(?:ro|or|ck|kc|et|te){2,5}\b', msg):
+    elif re.match(r'^!(?:ro|or|ck|kc|et|te){2,6}\b', msg):
       logger.info('Sending wonky rocket: {}'.format(msg[:11]))
       rocket_map = {
         'ro': self.ROCKET_THRUST,

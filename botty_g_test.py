@@ -145,18 +145,18 @@ class TestMessageResponses(unittest.TestCase):
     message.channel.send.assert_called_once_with(rocket_msg)
     message.add_reaction.assert_not_called()
 
-  def test_rooocket_sends_long_rocket(self):
-    rocket_msg = "\u200b<871843033883213914><871842514213142598><868858496257515520><868858506776817675><868858496257515520><868858506776817675><868858496257515520><868858506776817675><868858496257515520><868858506776817675><868858516687958126>"
+  def test_rooooocket_sends_long_rocket(self):
+    rocket_msg = "\u200b<871843033883213914><871842514213142598><868858496257515520><868858506776817675><868858496257515520><868858506776817675><868858496257515520><868858506776817675><868858496257515520><868858506776817675><868858496257515520><868858506776817675><868858496257515520><868858506776817675><868858516687958126>"
     message = self.msg
-    message.content = "!rooocket"
+    message.content = "!rooooocket"
     self.loop.run_until_complete(self.tested.on_message(message))
     message.channel.send.assert_called_once_with(rocket_msg)
     message.add_reaction.assert_not_called()
 
-  def test_roooocket_sends_rocket_crash(self):
+  def test_roooooocket_sends_rocket_crash(self):
     rocket_msg = "\u200b<871843033883213914><871842514213142598><868858496257515520><868858506776817675>💥  💥<868858496257515520><868858506776817675><868858516687958126>"
     message = self.msg
-    message.content = "!roooocket"
+    message.content = "!roooooocket"
     self.loop.run_until_complete(self.tested.on_message(message))
     message.channel.send.assert_has_calls(
         [mock.call(rocket_msg), mock.call('Oh the humanity!')])
@@ -203,9 +203,9 @@ class TestMessageResponses(unittest.TestCase):
     message.channel.send.assert_called_once_with(rocket_msg)
     message.add_reaction.assert_not_called()
 
-  def test_roorckkeette_is_too_long(self):
+  def test_roorckkceettero_is_too_long(self):
     message = self.msg
-    message.content = "!roorckkcette"
+    message.content = "!roorckkcettero"
     self.loop.run_until_complete(self.tested.on_message(message))
     message.channel.send.assert_not_called()
     message.add_reaction.assert_not_called()
