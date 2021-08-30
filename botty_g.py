@@ -104,9 +104,13 @@ ZERO_WIDTH_SPACE = "​"
 class BottyG(discord.Client):
   EMOJIS = defaultdict(lambda: 'Failed to load Atomic Frontier emojis!')
 
-  def _get_emoji(self, _id):
-    return str(discord.utils.get(
-        self.atomic_frontier.emojis, id=_id))
+  def _get_emoji(self, _id, server="atomic_frontier"):
+    if server == "atomic_frontier":
+      return str(discord.utils.get(
+          self.atomic_frontier.emojis, id=_id))
+    elif server == "demo_server":
+      return str(discord.utils.get(
+          self.demo_server.emojis, id=_id))
 
   def _populate_emojis(self):
     self.EMOJIS = {

@@ -107,7 +107,7 @@ class TestMessageResponses(unittest.TestCase):
 
     self.tested = BottyG()
     self.tested._get_emoji = MagicMock(side_effect=lambda id: "<" + str(id) + ">")
-    self.tested.get_guild = MagicMock()
+    self.tested.get_guild = MagicMock(side_effect=lambda id: "[" + str(id) + "]")
 
     self.msg = AsyncMock()
     # We have to provide an author, or else the value stored here is an
@@ -121,6 +121,12 @@ class TestMessageResponses(unittest.TestCase):
   def tearDown(self):
     self.patcher.stop()
     self.loop.close()
+
+  def test_atomic_frontier_set_up_properly(self):
+    self.assertEqual(self.tested.atomic_frontier, "[800703973890850836]")
+
+  def test_demo_server_set_up_properly(self):
+    self.assertEqual(self.tested.demo_server, "[879111900485517394]")
 
   def test_no_response_to_own_message(self):
     message = AsyncMock()
