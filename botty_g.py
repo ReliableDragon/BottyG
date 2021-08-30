@@ -150,6 +150,7 @@ class BottyG(discord.Client):
     msg = message.content.lower()
     logger.info('Got a message: {}'.format(msg))
 
+    # Self-loop check
     if message.author == self.user:
       logger.info('We sent this message!')
       return
@@ -157,12 +158,13 @@ class BottyG(discord.Client):
     # Rocket commands
     await self.rocketry.gen_rocket_command_responses(message)
 
+    # Quotes
     if msg.startswith('!advice') or msg.startswith('!quote'):
       logger.info('Sending advice.')
       rand_num = random.randint(0, len(QUOTES))
       await message.channel.send(QUOTES[rand_num])
 
-    # Add reactions
+    # Add emoji reactions to messages
     await reactions.add_reactions(message, self.EMOJIS)
 
     # Reaction images
