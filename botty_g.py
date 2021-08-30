@@ -2,6 +2,7 @@ import discord
 import random
 import logging
 import re
+import reactions
 
 from logging.handlers import RotatingFileHandler
 from collections import defaultdict
@@ -45,7 +46,7 @@ PERFECT_GIF = "https://tenor.com/view/pacha-perfect-emperors-new-groove-very-goo
 AERODYNAMIC_COW_GIF = "https://tenor.com/view/cow-airflow-diagram-vectors-aerodynamics-gif-4785226"
 CLAP_GIF = "https://tenor.com/view/good-job-clapping-leonardo-dicaprio-bravo-great-gif-7248435"
 
-REACTIONS = {
+REACTION_IMAGES = {
     "!baguette": BAGUETTE_CLIP,
     "!snacktime": SAND_CLIP,
     "!danceparty": DANCE_CLIP,
@@ -83,7 +84,7 @@ More commands:
 !reactions
 ```"""
 
-REACTIONS_MSG = """```
+REACTION_IMAGES_MSG = """```
 !baguette
 !snacktime
 !danceparty
@@ -95,7 +96,6 @@ REACTIONS_MSG = """```
 !cow
 !clap
 ```"""
-
 
 ZERO_WIDTH_SPACE = "​"
 
@@ -130,18 +130,7 @@ class BottyG(discord.Client):
         'james': self._get_emoji(EMOJI_IDS['james']),
     }
 
-  async def on_ready(self):
-    logger.info('Logged in as')
-    logger.info(self.user.name)
-    logger.info(self.user.id)
-    logger.info('------')
-
-    atomic_frontier_id = 800703973890850836
-    self.atomic_frontier = self.get_guild(atomic_frontier_id)
-    if self.atomic_frontier == None:
-      logger.info('Failed to load Atomic Frontier data!')
-      return
-    self._populate_emojis()
+  def _populate_rocket_parts(self):
     self.ROCKET = "{}{}{}{}{}".format(
         self.EMOJIS['spotty_fire'],
         self.EMOJIS['spotty_thruster'],
@@ -168,6 +157,25 @@ class BottyG(discord.Client):
     self.ROCKET_BODY_REV = "{}{}".format(
         self.EMOJIS['spotty4'],
         self.EMOJIS['spotty3'])
+
+  async def on_ready(self):
+    logger.info('Logged in as')
+    logger.info(self.user.name)
+    logger.info(self.user.id)
+    logger.info('------')
+
+    demo_server_id = 879111900485517394
+    self.demo_server = self.get_guild(demo_server_id)
+    if self.demo_server == None:
+      logger.warning('Failed to load demo server!')
+
+    atomic_frontier_id = 800703973890850836
+    self.atomic_frontier = self.get_guild(atomic_frontier_id)
+    if self.atomic_frontier == None:
+      logger.warning('Failed to load Atomic Frontier data!')
+
+    self._populate_emojis()
+    self._populate_rocket_parts()
     logger.info('All emojis loaded!')
 
   async def on_message(self, message):
@@ -239,80 +247,13 @@ class BottyG(discord.Client):
         i += 2
       await message.channel.send(wonky_rocket)
 
-    # Historical reactions
-    elif ('bobby g' in msg or
-          'goddard' in msg):
-      logger.info('Sending bobby g')
-      await message.add_reaction(self.EMOJIS['bobby_g'])
-
-    elif 'rocket' in msg and not msg.startswith('!'):
-      logger.info('Reacting to rocket.')
-      await message.add_reaction('🚀')
-
-    if ('worcester polytechnic' in msg or
-        'clark university' in msg):
-      logger.info('Reacting to alma mater.')
-      await message.add_reaction('🎓')
-
-    if (('worcester' in msg and
-          not 'worcester polytechnic' in msg) or
-          'massachusetts' in msg):
-      logger.info('Reacting to home.')
-      await message.add_reaction('🏠')
-
-    if ('space' in msg or
-        'astronomy' in msg or
-        'mars' in msg):
-      logger.info('Reacting to the stars.')
-      await message.add_reaction('🔭')
-
-    if ('war of the worlds' in msg):
-      logger.info('Reacting to favorite book.')
-      await message.add_reaction('📖')
-
-    if ('sigma alpha epsilon' in msg):
-      logger.info('Reacting to fraternity.')
-      await message.add_reaction('🇬🇷')
-
-    if ('tuberculosis' in msg):
-      logger.info('Reacting to illness.')
-      await message.add_reaction('🤒')
-
-    # Goddard invented the precursor to the bazooka!
-    if ('bazooka' in msg):
-      logger.info('Reacting to bazooka.')
-      await message.add_reaction('🔫')
-
-    if ('lindbergh' in msg):
-      logger.info('Reacting to friend.')
-      await message.add_reaction('✈️')
-
-    if ('roswell' in msg):
-      logger.info('Reacting to roswell.')
-      await message.add_reaction('👽')
-
-    if ('esther' in msg):
-      logger.info('Reacting to wife.')
-      await message.add_reaction('💍')
-
-    if ('nahum' in msg):
-      logger.info('Reacting to father.')
-      await message.add_reaction('👨‍👦')
-
-    # Silly server related reactions
-    if ('james' in msg):
-      logger.info('Reacting to james.')
-      await message.add_reaction(self.EMOJIS['james'])
-
-    if ('surstromming' in msg):
-      logger.info('Reacting to stinky fish.')
-      await message.add_reaction(self.EMOJIS['stinky_fish'])
+    await reactions.add_reactions(message, self.EMOJIS)
 
     # Reaction images
-    for key in REACTIONS:
+    for key in REACTION_IMAGES:
       if msg.startswith(key):
         logger.info('Sending reaction image for {}.'.format(key))
-        await message.channel.send(REACTIONS[key])
+        await message.channel.send(REACTION_IMAGES[key])
 
     # Timezone conversion
     time_zone_response = generate_time_zone_response(msg)
@@ -325,10 +266,10 @@ class BottyG(discord.Client):
       logger.info('Sending command list.')
       await message.channel.send(COMMANDS)
 
-    # Help text
+    # Reactions list
     if msg.startswith('!reactions'):
       logger.info('Sending reaction list.')
-      await message.channel.send(REACTIONS_MSG)
+      await message.channel.send(REACTION_IMAGES_MSG)
 
 
 if __name__ == "__main__":
