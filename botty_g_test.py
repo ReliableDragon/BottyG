@@ -19,6 +19,7 @@ logger.addHandler(my_handler)
 
 
 class MockUser:
+
   def __init__(self, name, id):
     self.name = name
     self.id = id
@@ -29,6 +30,8 @@ class MockUser:
   def __ne__(self, other):
     return not self.__eq__(other)
 
+# These overlap with rocket_utils_test, but are kept here because the
+# integration with the _get_emoji() method is critical.
 class TestEmojiLoading(unittest.TestCase):
 
   def setUp(self):
@@ -127,55 +130,6 @@ class TestMessageResponses(unittest.TestCase):
     message.channel.send.assert_not_called()
     message.add_reaction.assert_not_called()
 
-  def test_rocket_sends_rocket(self):
-    rocket_msg = "\u200b<871843033883213914><871842514213142598><868858496257515520><868858506776817675><868858496257515520><868858506776817675><868858516687958126>"
-    message = self.msg
-    message.content = "!rocket"
-    self.loop.run_until_complete(self.tested.on_message(message))
-    message.channel.send.assert_called_once_with(rocket_msg)
-    message.add_reaction.assert_not_called()
-
-  def test_upper_case_rocket_sends_rocket(self):
-    rocket_msg = "\u200b<871843033883213914><871842514213142598><868858496257515520><868858506776817675><868858496257515520><868858506776817675><868858516687958126>"
-    message = self.msg
-    message.content = "!ROCKET"
-    self.loop.run_until_complete(self.tested.on_message(message))
-    message.channel.send.assert_called_once_with(rocket_msg)
-    message.add_reaction.assert_not_called()
-
-  def test_rooooocket_sends_long_rocket(self):
-    rocket_msg = "\u200b<871843033883213914><871842514213142598><868858496257515520><868858506776817675><868858496257515520><868858506776817675><868858496257515520><868858506776817675><868858496257515520><868858506776817675><868858496257515520><868858506776817675><868858496257515520><868858506776817675><868858516687958126>"
-    message = self.msg
-    message.content = "!rooooocket"
-    self.loop.run_until_complete(self.tested.on_message(message))
-    message.channel.send.assert_called_once_with(rocket_msg)
-    message.add_reaction.assert_not_called()
-
-  def test_roooooocket_sends_rocket_crash(self):
-    rocket_msg = "\u200b<871843033883213914><871842514213142598><868858496257515520><868858506776817675>💥  💥<868858496257515520><868858506776817675><868858516687958126>"
-    message = self.msg
-    message.content = "!roooooocket"
-    self.loop.run_until_complete(self.tested.on_message(message))
-    message.channel.send.assert_has_calls(
-        [mock.call(rocket_msg), mock.call('Oh the humanity!')])
-    message.add_reaction.assert_not_called()
-
-  def test_payload_sends_payload(self):
-    rocket_msg = "\u200b<871843033883213914><871842514213142598><868858496257515520><868858506776817675>🇦🇺<868858516687958126>"
-    message = self.msg
-    message.content = "!payload🇦🇺"
-    self.loop.run_until_complete(self.tested.on_message(message))
-    message.channel.send.assert_called_once_with(rocket_msg)
-    message.add_reaction.assert_not_called()
-
-  def test_crash_sends_crash(self):
-    rocket_msg = "\u200b<871843033883213914><871842514213142598><868858496257515520><868858506776817675><868858516687958126>💥<875529103984431154><868858506776817675><868858496257515520><875529093729357855><871843033883213914>"
-    message = self.msg
-    message.content = "!crash"
-    self.loop.run_until_complete(self.tested.on_message(message))
-    message.channel.send.assert_called_once_with(rocket_msg)
-    message.add_reaction.assert_not_called()
-
   def test_quote_sends_quote(self):
     rocket_msg = "It is difficult to say what is impossible, for the dream of yesterday is the hope of today and the reality of tomorrow."
     message = self.msg
@@ -185,27 +139,13 @@ class TestMessageResponses(unittest.TestCase):
     message.channel.send.assert_called_once_with(rocket_msg)
     message.add_reaction.assert_not_called()
 
-  def test_tekcor_sends_reverse_rocket(self):
-    rocket_msg = "\u200b<875529103984431154><868858506776817675><868858496257515520><875529093729357855><871843033883213914>"
-    message = self.msg
-    message.content = "!tekcor"
-    self.loop.run_until_complete(self.tested.on_message(message))
-    message.channel.send.assert_called_once_with(rocket_msg)
-    message.add_reaction.assert_not_called()
-
+  # Already tested in rocket_utils_test, kept here for integration testing.
   def test_roorckette_sends_wonkyrocket(self):
     rocket_msg = "\u200b<871843033883213914><871842514213142598><875529093729357855><871843033883213914><868858496257515520><868858506776817675><868858516687958126><875529103984431154>"
     message = self.msg
     message.content = "!roorckette"
     self.loop.run_until_complete(self.tested.on_message(message))
     message.channel.send.assert_called_once_with(rocket_msg)
-    message.add_reaction.assert_not_called()
-
-  def test_roorckkceettero_is_too_long(self):
-    message = self.msg
-    message.content = "!roorckkcettero"
-    self.loop.run_until_complete(self.tested.on_message(message))
-    message.channel.send.assert_not_called()
     message.add_reaction.assert_not_called()
 
   def test_baguette_sends_clip(self):
@@ -320,6 +260,7 @@ class TestMessageResponses(unittest.TestCase):
     message.channel.send.assert_called_once_with(time_zone_message)
     message.add_reaction.assert_not_called()
 
+  # Already tested in reaction_test, kept here for integration purposes.
   def test_reaction(self):
     text = "heyo its your boy bobby g back at it again"
     reaction = "<875428431133810740>"
@@ -330,6 +271,7 @@ class TestMessageResponses(unittest.TestCase):
     message.add_reaction.assert_called_once_with(reaction)
     message.reset_mock()
 
+  # Already tested in reaction_test, kept here for integration purposes.
   def test_multi_reaction(self):
     text = "heyo its your boy bobby g back at it again with the space planes"
     bobby_g_reaction = "<875428431133810740>"
