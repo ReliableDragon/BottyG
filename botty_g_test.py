@@ -269,7 +269,7 @@ class TestMessageResponses(unittest.TestCase):
   def test_perfect_sends_clip(self):
     rocket_msg = "https://tenor.com/view/pacha-perfect-emperors-new-groove-very-good-gif-5346522"
     message = self.msg
-    message.content = "!perfect"
+    message.content = "!perfection"
     self.loop.run_until_complete(self.tested.on_message(message))
     message.channel.send.assert_called_once_with(rocket_msg)
     message.add_reaction.assert_not_called()
@@ -278,6 +278,14 @@ class TestMessageResponses(unittest.TestCase):
     rocket_msg = "https://tenor.com/view/cow-airflow-diagram-vectors-aerodynamics-gif-4785226"
     message = self.msg
     message.content = "!cow"
+    self.loop.run_until_complete(self.tested.on_message(message))
+    message.channel.send.assert_called_once_with(rocket_msg)
+    message.add_reaction.assert_not_called()
+
+  def test_clap_sends_clip(self):
+    rocket_msg = "https://tenor.com/view/good-job-clapping-leonardo-dicaprio-bravo-great-gif-7248435"
+    message = self.msg
+    message.content = "!clap"
     self.loop.run_until_complete(self.tested.on_message(message))
     message.channel.send.assert_called_once_with(rocket_msg)
     message.add_reaction.assert_not_called()
@@ -291,12 +299,17 @@ class TestMessageResponses(unittest.TestCase):
     message.add_reaction.assert_not_called()
 
   def test_reactions_sends_reactions(self):
-    commands_msg = botty_g.REACTIONS
+    commands_msg = botty_g.REACTIONS_MSG
     message = self.msg
     message.content = "!reactions"
     self.loop.run_until_complete(self.tested.on_message(message))
     message.channel.send.assert_called_once_with(commands_msg)
     message.add_reaction.assert_not_called()
+
+  def test_reactions_in_sync_with_reactions_msg(self):
+    gif_list = sorted(botty_g.REACTIONS.keys())
+    reactions_list = sorted(botty_g.REACTIONS_MSG[3:-3].strip().split('\n'))
+    self.assertListEqual(gif_list, reactions_list)
 
   def test_time_zone_response(self):
     time_zone_message = ("23:59 PDT is:\n"

@@ -45,12 +45,15 @@ PERFECT_GIF = "https://tenor.com/view/pacha-perfect-emperors-new-groove-very-goo
 AERODYNAMIC_COW_GIF = "https://tenor.com/view/cow-airflow-diagram-vectors-aerodynamics-gif-4785226"
 CLAP_GIF = "https://tenor.com/view/good-job-clapping-leonardo-dicaprio-bravo-great-gif-7248435"
 
-GIFS = {
+REACTIONS = {
+    "!baguette": BAGUETTE_CLIP,
+    "!snacktime": SAND_CLIP,
+    "!danceparty": DANCE_CLIP,
     "!nope": NOPE_GIF,
     "!synapsid": SYNAPSID_PIC,
     "!timezones": TIME_ZONES_GIF,
     "!confusion": BLINK_GIF,
-    "!perfect": PERFECT_GIF,
+    "!perfection": PERFECT_GIF,
     "!cow": AERODYNAMIC_COW_GIF,
     "!clap": CLAP_GIF,
 }
@@ -80,7 +83,7 @@ More commands:
 !reactions
 ```"""
 
-REACTIONS = """```
+REACTIONS_MSG = """```
 !baguette
 !snacktime
 !danceparty
@@ -236,19 +239,6 @@ class BottyG(discord.Client):
         i += 2
       await message.channel.send(wonky_rocket)
 
-    # Clips
-    elif msg.startswith('!baguette'):
-      logger.info('Sending baguette.')
-      await message.channel.send(BAGUETTE_CLIP)
-
-    elif msg.startswith('!snacktime'):
-      logger.info('Sending sand.')
-      await message.channel.send(SAND_CLIP)
-
-    elif msg.startswith('!danceparty'):
-      logger.info('Sending dancer.')
-      await message.channel.send(DANCE_CLIP)
-
     # Historical reactions
     elif ('bobby g' in msg or
           'goddard' in msg):
@@ -319,10 +309,10 @@ class BottyG(discord.Client):
       await message.add_reaction(self.EMOJIS['stinky_fish'])
 
     # Reaction images
-    for key in GIFS:
+    for key in REACTIONS:
       if msg.startswith(key):
         logger.info('Sending reaction image for {}.'.format(key))
-        await message.channel.send(GIFS[key])
+        await message.channel.send(REACTIONS[key])
 
     # Timezone conversion
     time_zone_response = generate_time_zone_response(msg)
@@ -338,7 +328,7 @@ class BottyG(discord.Client):
     # Help text
     if msg.startswith('!reactions'):
       logger.info('Sending reaction list.')
-      await message.channel.send(REACTIONS)
+      await message.channel.send(REACTIONS_MSG)
 
 
 if __name__ == "__main__":
