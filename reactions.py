@@ -1,4 +1,5 @@
 import logging
+import re
 
 
 async def add_reactions(message, emojis):
@@ -72,3 +73,17 @@ async def add_reactions(message, emojis):
   if ('surstromming' in msg):
     logger.info('Reacting to stinky fish.')
     await message.add_reaction(emojis['stinky_fish'])
+
+  # React to Mild's ideas. ;)
+  # name="󠇰 󠇰", discriminator="8273"
+  # id: 410832969599811585
+  # my id: 466722871733911553
+  if message.author.id == 410832969599811585:
+    msg = ''.join([c for c in msg if c == ' ' or c.isalpha()])
+    idea_phrases = [
+      r"(?:i|ive) (?:(?!(?:not?|you|he|she|they)\b)\w+ )*(?:had|have|got|came up with|(?:(?:you|he|she|they|it|this) (?:(?!not?\b)\w+ )*gave (?:(?!no\b)\w+ )*me)) (?:(?!no\b)\w+ )*idea",
+      r"(?:gave|giv\w+) me (?:an?) (?:(?!(?:not?)\b)\w+ ){0,3}idea",
+      # r"thanks for (?:(?!(?:not?|you|he|she|they)\b)\w+ )*idea",
+    ]
+    if any([re.search(pattern, msg) for pattern in idea_phrases]):
+      await message.add_reaction(emojis['stop'])

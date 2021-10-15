@@ -71,6 +71,7 @@ EMOJI_IDS = {
     'spotty_thruster_rev': 875529093729357855,
     'stinky_fish': 879257588225679390,
     'james': 871742964102205480,
+    'stop': 868861043210870794,
 }
 
 COMMANDS = """```
@@ -123,6 +124,7 @@ class BottyG(discord.Client):
         'spotty_thruster': self._get_emoji(EMOJI_IDS['spotty_thruster']),
         'spotty_thruster_rev': self._get_emoji(EMOJI_IDS['spotty_thruster_rev']),
         'stinky_fish': self._get_emoji(EMOJI_IDS['stinky_fish']),
+        'stop': self._get_emoji(EMOJI_IDS['stop']),
         'james': self._get_emoji(EMOJI_IDS['james']),
     }
 

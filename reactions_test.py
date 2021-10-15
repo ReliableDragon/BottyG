@@ -3,7 +3,12 @@ import reactions
 import asyncio
 
 from unittest.mock import MagicMock
+from unittest.mock import Mock
 from async_mock import AsyncMock
+
+class MockUser:
+  def __init__(self, id):
+    self.id = id
 
 class TestAddReactions(unittest.TestCase):
 
@@ -11,6 +16,7 @@ class TestAddReactions(unittest.TestCase):
     'bobby_g': "<875428431133810740>",
     'james': "<871742964102205480>",
     'stinky_fish': "<879257588225679390>",
+    'stop': "<868861043210870794>",
   }
 
   def setUp(self):
@@ -47,8 +53,89 @@ class TestAddReactions(unittest.TestCase):
       with self.subTest(msg=text):
         message = AsyncMock()
         message.content = text
+        message.author = MockUser(id=24601)
         self.loop.run_until_complete(
             reactions.add_reactions(message, self.EMOJIS))
         message.channel.send.assert_not_called()
         message.add_reaction.assert_called_once_with(reaction)
+        message.reset_mock()
+
+  def test_mild_idea_reactions(self):
+    test_cases = [
+      # "thanks for a great idea",
+      "oh yeah i just had an amazing idea",
+      "this gives me an idea",
+      "that's given me an idea",
+      "i just had a terrible idea",
+      "i've just had a terrible idea",
+      "this image gave me a great idea…",
+      "i have an idea…",
+      "oh i just got an idea",
+      # "oh thanks for the idea",
+      "that gives me an amazingly cursed idea...",
+      "that gives me an idea...",
+    ]
+    for text in test_cases:
+      with self.subTest(msg=text):
+        message = AsyncMock()
+        message.content = text
+        message.author = AsyncMock()
+        message.author = MockUser(id=410832969599811585)
+        self.loop.run_until_complete(
+            reactions.add_reactions(message, self.EMOJIS))
+        message.channel.send.assert_not_called()
+        message.add_reaction.assert_called_once_with("<868861043210870794>")
+        message.reset_mock()
+
+  def test_mild_nonideas_dont_react(self):
+    test_cases = [
+      "feels like a good idea",
+      "sounds like a good idea",
+      "i have no idea what to say",
+      "agree this does feel like a good idea.",
+      "i like the lying down idea",
+      "no i was more thinking “do you guys think it’s a good idea?”",
+      "im sure thats a great idea",
+      "anyways i have to go to bed now.",
+      "yes definitely",
+      "im sure thats a great idea",
+      "i have no idea why",
+      "usually last but i think your idea to put it in a random spot is more fun",
+      "so now that you have tried to read, do you have any idea about what i’m saying.",
+      "it’s kinda niche but the idea is cool, just a couple hundred years old…",
+      "if anyone has any ideas of what more to change in the image ill would love to hear feedback",
+      "i shouldn’t be giving advice on something where i don’t know everything but it sounds like moving is a good idea.",
+      "I think you had a good idea last night.",
+      "that gave you and idea right anyway me and rob also had an idea",
+      "thanks for giving me help an idea i had is this",
+    ]
+    for text in test_cases:
+      with self.subTest(msg=text):
+        message = AsyncMock()
+        message.content = text
+        message.author = MockUser(id=410832969599811585)
+        self.loop.run_until_complete(
+            reactions.add_reactions(message, self.EMOJIS))
+        message.channel.send.assert_not_called()
+        message.add_reaction.assert_not_called()
+        message.reset_mock()
+
+  def test_non_mild_idea_doesnt_react(self):
+    test_cases = [
+      "oh yeah i just had an amazing idea",
+      "this gives me an idea",
+      "that's given me an idea",
+      "i just had a terrible idea",
+      "i've just had a terrible idea",
+      "this image gave me a great idea…",
+    ]
+    for text in test_cases:
+      with self.subTest(msg=text):
+        message = AsyncMock()
+        message.content = text
+        message.author = MockUser(id=24601)
+        self.loop.run_until_complete(
+            reactions.add_reactions(message, self.EMOJIS))
+        message.channel.send.assert_not_called()
+        message.add_reaction.assert_not_called()
         message.reset_mock()
