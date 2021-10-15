@@ -11,7 +11,9 @@ async def add_reactions(message, emojis):
     logger.info('Sending bobby g')
     await message.add_reaction(emojis['bobby_g'])
 
-  if 'rocket' in msg and not msg.startswith('!'):
+  if ((re.search(r'\brockets?\b', msg) or
+      re.search(r'\brocketry\b', msg))
+      and not msg.startswith('!')):
     logger.info('Reacting to rocket.')
     await message.add_reaction('🚀')
 
@@ -26,9 +28,9 @@ async def add_reactions(message, emojis):
     logger.info('Reacting to home.')
     await message.add_reaction('🏠')
 
-  if ('space' in msg or
-    'astronomy' in msg or
-    'mars' in msg):
+  if (re.search(r'\bspace\b', msg) or
+    re.search(r'\bastronomy\b', msg) or
+    re.search(r'\bmars\b', msg)):
     logger.info('Reacting to the stars.')
     await message.add_reaction('🔭')
 
@@ -40,33 +42,33 @@ async def add_reactions(message, emojis):
     logger.info('Reacting to fraternity.')
     await message.add_reaction('🇬🇷')
 
-  if ('tuberculosis' in msg):
+  if (re.search(r'\btuberculosis\b', msg)):
     logger.info('Reacting to illness.')
     await message.add_reaction('🤒')
 
   # Goddard invented the precursor to the bazooka!
-  if ('bazooka' in msg):
+  if (re.search(r'\bbazookas?\b', msg)):
     logger.info('Reacting to bazooka.')
     await message.add_reaction('🔫')
 
-  if ('lindbergh' in msg):
+  if (re.search(r'\blindbergh\b', msg)):
     logger.info('Reacting to friend.')
     await message.add_reaction('✈️')
 
-  if ('roswell' in msg):
+  if (re.search(r'\broswell\b', msg)):
     logger.info('Reacting to roswell.')
     await message.add_reaction('👽')
 
-  if ('esther' in msg):
+  if (re.search(r'\besther\b', msg)):
     logger.info('Reacting to wife.')
     await message.add_reaction('💍')
 
-  if ('nahum' in msg):
+  if (re.search(r'\bnahum\b', msg)):
     logger.info('Reacting to father.')
     await message.add_reaction('👨‍👦')
 
   # Silly server related reactions
-  if ('james' in msg):
+  if (re.search(r'\bjames\b', msg)):
     logger.info('Reacting to james.')
     await message.add_reaction(emojis['james'])
 
