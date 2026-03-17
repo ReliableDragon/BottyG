@@ -66,12 +66,14 @@ release_dir=\${RELEASES_DIR}/\${resolved_sha}
 if [[ ! -d \${release_dir} ]]; then
   mkdir -p \${release_dir}
   run_as_bot git -C \${REPO_DIR} archive \${resolved_sha} | tar -x -C \${release_dir}
+  chown -R botrunner:botrunner \${release_dir}
   python3 -m venv \${release_dir}/env
   \${release_dir}/env/bin/pip install --upgrade pip
   \${release_dir}/env/bin/pip install -r \${release_dir}/gcp/requirements.txt
 fi
 
 ln -sfn \${release_dir} \${CURRENT_LINK}
+chown -R botrunner:botrunner \${BOT_HOME}
 systemctl restart botty-g.service
 systemctl status --no-pager botty-g.service
 '"

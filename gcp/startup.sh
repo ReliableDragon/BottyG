@@ -50,6 +50,7 @@ release_dir="${RELEASES_DIR}/${resolved_sha}"
 if [[ ! -d "${release_dir}" ]]; then
   mkdir -p "${release_dir}"
   run_as_bot git -C "${REPO_DIR}" archive "${resolved_sha}" | tar -x -C "${release_dir}"
+  chown -R "${BOT_USER}:${BOT_USER}" "${release_dir}"
   python3 -m venv "${release_dir}/env"
   "${release_dir}/env/bin/pip" install --upgrade pip
   "${release_dir}/env/bin/pip" install -r "${release_dir}/gcp/requirements.txt"
