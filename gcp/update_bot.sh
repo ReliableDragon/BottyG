@@ -29,7 +29,12 @@ run_as_bot() {
 }
 
 run_as_bot git -C \${REPO_DIR} fetch --all --tags --prune
-run_as_bot git -C \${REPO_DIR} checkout --detach \"\${APP_REF}\"
+deploy_ref=\${APP_REF}
+if run_as_bot git -C \${REPO_DIR} show-ref --verify --quiet \"refs/remotes/origin/\${APP_REF}\"; then
+  deploy_ref=\"origin/\${APP_REF}\"
+fi
+
+run_as_bot git -C \${REPO_DIR} checkout --detach \"\${deploy_ref}\"
 resolved_sha=\$(run_as_bot git -C \${REPO_DIR} rev-parse --verify HEAD)
 release_dir=\${RELEASES_DIR}/\${resolved_sha}
 
