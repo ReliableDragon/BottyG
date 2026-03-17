@@ -7,6 +7,7 @@ import rocket_utils
 
 from logging.handlers import RotatingFileHandler
 from collections import defaultdict
+from google.cloud import secretmanager
 from timezone_converter import generate_time_zone_response
 
 my_handler = RotatingFileHandler(
@@ -17,7 +18,20 @@ logger = logging.getLogger('root')
 logger.setLevel(logging.DEBUG)
 logger.addHandler(my_handler)
 
-TOKEN = open('token.txt','r').readline()
+PROJECT_ID = "bottyg"
+SECRET_ID = "discord_bot_token"
+
+
+def get_discord_token():
+  client = secretmanager.SecretManagerServiceClient()
+  secret_version = (
+      f"projects/{PROJECT_ID}/secrets/{SECRET_ID}/versions/latest")
+  response = client.access_secret_version(request={"name": secret_version})
+  token = response.payload.data.decode("utf-8").strip()
+  if not token:
+    raise ValueError(
+        f"Secret {SECRET_ID} in project {PROJECT_ID} is empty.")
+  return token
 
 QUOTES = (
     'It is difficult to say what is impossible, for the dream of yesterday is the hope of today and the reality of tomorrow.',
@@ -101,9 +115,14 @@ REACTION_IMAGES_MSG = """```
 
 ZERO_WIDTH_SPACE = "​"
 
+intents = discord.Intents.default()
+intents.message_content = True
 
 class BottyG(discord.Client):
   EMOJIS = defaultdict(lambda: 'Failed to load Atomic Frontier emojis!')
+
+  def __init__(self):
+    pass
 
   def _get_emoji(self, _id, server="atomic_frontier"):
     if server == "atomic_frontier":
@@ -193,5 +212,6 @@ class BottyG(discord.Client):
 
 
 if __name__ == "__main__":
+  token = get_discord_token()
   botty_g = BottyG()
-  botty_g.run(TOKEN)
+  botty_g.run(token)

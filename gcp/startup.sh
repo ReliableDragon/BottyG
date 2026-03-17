@@ -1,33 +1,79 @@
-# Add user to run job
-useradd -m -d /home/botrunner botrunner
+#!/usr/bin/env bash
+set -euxo pipefail
 
-mkdir /bots/botty_g
+BOT_USER="botrunner"
+BOT_HOME="/bots/botty_g"
+RELEASES_DIR="${BOT_HOME}/releases"
+REPO_DIR="${BOT_HOME}/repo"
+CURRENT_LINK="${BOT_HOME}/current"
+SYSTEMD_UNIT="/etc/systemd/system/botty-g.service"
 
-# Set ownership to runner account
-chown -R botrunner:botrunner /bots/botty_g
+METADATA_URL="http://metadata.google.internal/computeMetadata/v1/instance/attributes"
+METADATA_HEADER="Metadata-Flavor: Google"
 
-# Update and install
+APP_REPO="$(curl -fsS -H "${METADATA_HEADER}" "${METADATA_URL}/APP_REPO")"
+APP_REF="$(curl -fsS -H "${METADATA_HEADER}" "${METADATA_URL}/APP_REF" || true)"
+if [[ -z "${APP_REF}" ]]; then
+  APP_REF="main"
+fi
+
+if ! id -u "${BOT_USER}" >/dev/null 2>&1; then
+  useradd -m -d "/home/${BOT_USER}" "${BOT_USER}"
+fi
+
+run_as_bot() {
+  sudo -u "${BOT_USER}" -- "$@"
+}
+
+mkdir -p "${RELEASES_DIR}" "${REPO_DIR}"
+chown -R "${BOT_USER}:${BOT_USER}" "${BOT_HOME}"
+
+export DEBIAN_FRONTEND=noninteractive
 apt-get update
-apt-get install -yq git supervisor python python-pip
-pip install --upgrade pip virtualenv
-pip install --upgrade firebase-admin
+apt-get install -yq git python3 python3-venv python3-pip
 
-# Fetch source code
-export HOME=/root
-git clone https://github.com/SethBorder/BottyG.git /bots/botty_g
+if [[ ! -d "${REPO_DIR}/.git" ]]; then
+  run_as_bot git clone "${APP_REPO}" "${REPO_DIR}"
+fi
 
-# Set ownership to runner account
-chown -R botrunner:botrunner /bots/botty_g
+run_as_bot git -C "${REPO_DIR}" fetch --all --tags --prune
+run_as_bot git -C "${REPO_DIR}" checkout --detach "${APP_REF}"
+resolved_sha="$(run_as_bot git -C "${REPO_DIR}" rev-parse --verify HEAD)"
 
-# Set up venv
-virtualenv -p python3 /bots/botty_g/env
-source /bots/botty_g/env/bin/activate
-/bots/botty_g/env/bin/pip install -r /bots/botty_g/gcp/requirements.txt
+# Use commit SHA for immutable release directory names.
+release_dir="${RELEASES_DIR}/${resolved_sha}"
+if [[ ! -d "${release_dir}" ]]; then
+  mkdir -p "${release_dir}"
+  run_as_bot git -C "${REPO_DIR}" archive "${resolved_sha}" | tar -x -C "${release_dir}"
+  python3 -m venv "${release_dir}/env"
+  "${release_dir}/env/bin/pip" install --upgrade pip
+  "${release_dir}/env/bin/pip" install -r "${release_dir}/gcp/requirements.txt"
+fi
 
-# Deploy supervisor configs
-cp /bots/botty_g/python_app.conf /etc/supervisor/conf.d/python_app.conf
+ln -sfn "${release_dir}" "${CURRENT_LINK}"
+chown -R "${BOT_USER}:${BOT_USER}" "${BOT_HOME}"
 
-# Start service via supervisorctl
-supervisorctl reread
-supervisorctl update
-supervisorctl restart all
+cat > "${SYSTEMD_UNIT}" <<'EOF'
+[Unit]
+Description=BottyG Discord bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=botrunner
+Group=botrunner
+WorkingDirectory=/bots/botty_g/current
+ExecStart=/bots/botty_g/current/env/bin/python3 /bots/botty_g/current/botty_g.py
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable botty-g.service
+systemctl restart botty-g.service
