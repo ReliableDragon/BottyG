@@ -138,3 +138,31 @@ async def test_quote_command_can_select_last_quote(monkeypatch):
   message.channel.send.assert_called()
   sent_msg = message.channel.send.call_args[0][0]
   assert sent_msg == botty_g.QUOTES[-1]
+
+
+@pytest.mark.asyncio
+async def test_command_messages_skip_counters_and_passive_reactions(monkeypatch):
+  client = botty_g.BottyG()
+  rocket_mock = AsyncMock()
+  reaction_mock = AsyncMock()
+  counter_mock = Mock()
+
+  client.rocketry = types.SimpleNamespace(
+      gen_rocket_command_responses=rocket_mock)
+  client.EMOJIS = {"james": "<james>"}
+
+  monkeypatch.setattr(botty_g.reactions, "add_reactions", reaction_mock)
+  monkeypatch.setattr(botty_g, "increment_keyword_mentions", counter_mock)
+
+  message = types.SimpleNamespace(
+      content="!rocket",
+      author=types.SimpleNamespace(id=1234),
+      channel=types.SimpleNamespace(send=AsyncMock()),
+      add_reaction=AsyncMock(),
+  )
+
+  await client.on_message(message)
+
+  rocket_mock.assert_awaited_once_with(message)
+  counter_mock.assert_not_called()
+  reaction_mock.assert_not_awaited()

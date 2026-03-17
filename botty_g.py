@@ -252,6 +252,7 @@ class BottyG(discord.Client):
 
   async def on_message(self, message):
     msg = message.content.lower()
+    is_command = msg.startswith("!")
     logger.info('Got a message: {}'.format(msg))
 
     # Self-loop check
@@ -277,7 +278,8 @@ class BottyG(discord.Client):
           f"loss: {loss_count}")
       return
 
-    increment_keyword_mentions(message.content)
+    if not is_command:
+      increment_keyword_mentions(message.content)
 
     # Rocket commands
     await self.rocketry.gen_rocket_command_responses(message)
@@ -289,7 +291,8 @@ class BottyG(discord.Client):
       await message.channel.send(QUOTES[rand_num])
 
     # Add emoji reactions to messages
-    await reactions.add_reactions(message, self.EMOJIS)
+    if not is_command:
+      await reactions.add_reactions(message, self.EMOJIS)
 
     # Reaction images
     for key in REACTION_IMAGES:
