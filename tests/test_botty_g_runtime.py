@@ -52,6 +52,70 @@ def test_get_discord_token_propagates_secret_manager_errors(monkeypatch):
     botty_g.get_discord_token()
 
 
+def test_extract_keyword_mentions_counts_variants():
+  msg = "Rocket rockets james JAMES's loss losses"
+  assert botty_g.extract_keyword_mentions(msg) == {
+      "rocket": 2,
+      "james": 2,
+      "loss": 1,
+  }
+
+
+def test_extract_keyword_mentions_ignores_non_word_matches():
+  msg = "rocketeer flotsam glassy"
+  assert botty_g.extract_keyword_mentions(msg) == {}
+
+
+def test_increment_keyword_mentions_persists_counts(monkeypatch):
+  set_mock = Mock()
+  document_mock = Mock(set=set_mock)
+  collection_mock = Mock(document=Mock(return_value=document_mock))
+  db_mock = Mock(collection=Mock(return_value=collection_mock))
+
+  monkeypatch.setattr(botty_g, "get_firestore_client", Mock(return_value=db_mock))
+  monkeypatch.setattr(botty_g, "_get_firestore_increment", Mock(return_value=lambda n: ("INC", n)))
+
+  botty_g.increment_keyword_mentions("rocket rockets james loss")
+
+  db_mock.collection.assert_called_once_with("stats")
+  collection_mock.document.assert_called_once_with("mention_counts")
+  set_mock.assert_called_once_with(
+      {"rocket": ("INC", 2), "james": ("INC", 1), "loss": ("INC", 1)},
+      merge=True,
+  )
+
+
+def test_increment_keyword_mentions_no_matches_skips_firestore(monkeypatch):
+  db_mock = Mock()
+  monkeypatch.setattr(botty_g, "get_firestore_client", Mock(return_value=db_mock))
+
+  botty_g.increment_keyword_mentions("hello world")
+
+  db_mock.collection.assert_not_called()
+
+
+def test_get_keyword_mention_count_reads_firestore_value(monkeypatch):
+  snapshot_mock = Mock(to_dict=Mock(return_value={"rocket": 9}))
+  document_mock = Mock(get=Mock(return_value=snapshot_mock))
+  collection_mock = Mock(document=Mock(return_value=document_mock))
+  db_mock = Mock(collection=Mock(return_value=collection_mock))
+  monkeypatch.setattr(botty_g, "get_firestore_client", Mock(return_value=db_mock))
+
+  count = botty_g.get_keyword_mention_count("rocket")
+
+  assert count == 9
+
+
+def test_get_keyword_mention_count_defaults_to_zero(monkeypatch):
+  snapshot_mock = Mock(to_dict=Mock(return_value=None))
+  document_mock = Mock(get=Mock(return_value=snapshot_mock))
+  collection_mock = Mock(document=Mock(return_value=document_mock))
+  db_mock = Mock(collection=Mock(return_value=collection_mock))
+  monkeypatch.setattr(botty_g, "get_firestore_client", Mock(return_value=db_mock))
+
+  assert botty_g.get_keyword_mention_count("rocket") == 0
+
+
 @pytest.mark.asyncio
 async def test_quote_command_can_select_last_quote(monkeypatch):
   client = botty_g.BottyG()
@@ -60,6 +124,7 @@ async def test_quote_command_can_select_last_quote(monkeypatch):
   client.EMOJIS = {}
 
   monkeypatch.setattr(botty_g.random, "randint", lambda a, b: b)
+  monkeypatch.setattr(botty_g, "increment_keyword_mentions", lambda _: None)
 
   message = types.SimpleNamespace(
       content="!quote",

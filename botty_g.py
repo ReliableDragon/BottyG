@@ -20,6 +20,23 @@ logger.addHandler(my_handler)
 
 PROJECT_ID = "bottyg"
 SECRET_ID = "discord_bot_token"
+MENTIONS_COLLECTION = "stats"
+MENTIONS_DOC = "mention_counts"
+
+MENTION_PATTERNS = {
+    "rocket": re.compile(r"\brockets?\b"),
+    "james": re.compile(r"\bjames(?:'s)?\b"),
+    "loss": re.compile(r"\bloss\b"),
+}
+
+MENTION_COUNT_COMMANDS = {
+    "!rocket_count": "rocket",
+    "!james_count": "james",
+    "!loss_count": "loss",
+}
+ALL_COUNTS_COMMAND = "!counts"
+
+_firestore_client = None
 
 
 def get_discord_token():
@@ -32,6 +49,68 @@ def get_discord_token():
     raise ValueError(
         f"Secret {SECRET_ID} in project {PROJECT_ID} is empty.")
   return token
+
+
+def get_firestore_client():
+  global _firestore_client
+  if _firestore_client is not None:
+    return _firestore_client
+
+  import firebase_admin
+  from firebase_admin import firestore
+
+  try:
+    firebase_admin.get_app()
+  except ValueError:
+    firebase_admin.initialize_app(options={"projectId": PROJECT_ID})
+
+  _firestore_client = firestore.client()
+  return _firestore_client
+
+
+def _get_firestore_increment():
+  from firebase_admin import firestore
+  return firestore.Increment
+
+
+def extract_keyword_mentions(message_text):
+  msg = message_text.lower()
+  return {
+      key: len(pattern.findall(msg))
+      for key, pattern in MENTION_PATTERNS.items()
+      if pattern.search(msg)
+  }
+
+
+def increment_keyword_mentions(message_text):
+  mention_counts = extract_keyword_mentions(message_text)
+  if not mention_counts:
+    return
+
+  try:
+    db = get_firestore_client()
+    increment = _get_firestore_increment()
+    updates = {
+        key: increment(count) for key, count in mention_counts.items()
+    }
+    db.collection(MENTIONS_COLLECTION).document(MENTIONS_DOC).set(
+        updates, merge=True)
+  except Exception:
+    logger.exception("Failed to persist keyword mention counters.")
+
+
+def get_keyword_mention_count(keyword):
+  try:
+    db = get_firestore_client()
+    snapshot = db.collection(MENTIONS_COLLECTION).document(MENTIONS_DOC).get()
+    data = snapshot.to_dict() if snapshot else None
+    if not data:
+      return 0
+    count = data.get(keyword, 0)
+    return int(count)
+  except Exception:
+    logger.exception("Failed to read keyword mention count for %s.", keyword)
+    return 0
 
 QUOTES = (
     'It is difficult to say what is impossible, for the dream of yesterday is the hope of today and the reality of tomorrow.',
@@ -98,6 +177,10 @@ COMMANDS = """```
 !convert TIME_ZONE HH:MM TIME_ZONE...
 More commands:
 !reactions
+!rocket_count
+!james_count
+!loss_count
+!counts
 ```"""
 
 REACTION_IMAGES_MSG = """```
@@ -175,6 +258,26 @@ class BottyG(discord.Client):
     if message.author == self.user:
       logger.info('We sent this message!')
       return
+
+    # Mention counter query commands
+    for command, keyword in MENTION_COUNT_COMMANDS.items():
+      if msg.startswith(command):
+        count = get_keyword_mention_count(keyword)
+        await message.channel.send(
+            f"'{keyword}' has been mentioned {count} time(s).")
+        return
+    if msg.startswith(ALL_COUNTS_COMMAND):
+      rocket_count = get_keyword_mention_count("rocket")
+      james_count = get_keyword_mention_count("james")
+      loss_count = get_keyword_mention_count("loss")
+      await message.channel.send(
+          "Current mention totals:\n"
+          f"rocket: {rocket_count}\n"
+          f"james: {james_count}\n"
+          f"loss: {loss_count}")
+      return
+
+    increment_keyword_mentions(message.content)
 
     # Rocket commands
     await self.rocketry.gen_rocket_command_responses(message)

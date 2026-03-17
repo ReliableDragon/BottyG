@@ -22,7 +22,9 @@ async def ready_bot():
   own_user = MockUser(name="Jean Valjean", user_id=24601)
   with mock.patch(
       "botty_g.BottyG.user",
-      new=mock.PropertyMock(return_value=own_user)):
+      new=mock.PropertyMock(return_value=own_user)), mock.patch(
+      "botty_g.increment_keyword_mentions",
+      new=mock.MagicMock(return_value=None)):
     tested = botty_g.BottyG()
     tested._get_emoji = mock.MagicMock(side_effect=lambda emoji_id: f"<{emoji_id}>")
     tested.get_guild = mock.MagicMock(side_effect=lambda guild_id: f"[{guild_id}]")
@@ -119,6 +121,49 @@ async def test_help_and_reaction_list_commands(ready_bot, message_factory, comma
   await tested.on_message(message)
 
   message.channel.send.assert_called_once_with(expected)
+  message.add_reaction.assert_not_called()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "command, keyword, count",
+    [
+      ("!rocket_count", "rocket", 12),
+      ("!james_count", "james", 7),
+      ("!loss_count", "loss", 3),
+    ],
+)
+async def test_mention_count_commands(ready_bot, message_factory, command, keyword, count):
+  tested, _ = ready_bot
+  message = message_factory(command)
+  with mock.patch("botty_g.get_keyword_mention_count", return_value=count) as count_mock:
+    await tested.on_message(message)
+
+  count_mock.assert_called_once_with(keyword)
+  message.channel.send.assert_called_once_with(
+      f"'{keyword}' has been mentioned {count} time(s).")
+  message.add_reaction.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_counts_command(ready_bot, message_factory):
+  tested, _ = ready_bot
+  message = message_factory("!counts")
+
+  with mock.patch(
+      "botty_g.get_keyword_mention_count",
+      side_effect=lambda keyword: {
+          "rocket": 4,
+          "james": 9,
+          "loss": 2,
+      }[keyword]):
+    await tested.on_message(message)
+
+  message.channel.send.assert_called_once_with(
+      "Current mention totals:\n"
+      "rocket: 4\n"
+      "james: 9\n"
+      "loss: 2")
   message.add_reaction.assert_not_called()
 
 

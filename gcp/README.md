@@ -7,7 +7,7 @@ PROJECT_ID="bottyg"
 RUNTIME_SA="botty-g-runtime@${PROJECT_ID}.iam.gserviceaccount.com"
 
 gcloud config set project "${PROJECT_ID}"
-gcloud services enable compute.googleapis.com secretmanager.googleapis.com logging.googleapis.com
+gcloud services enable compute.googleapis.com secretmanager.googleapis.com logging.googleapis.com firestore.googleapis.com
 
 gcloud iam service-accounts create botty-g-runtime \
   --display-name="BottyG Runtime"
@@ -19,6 +19,10 @@ gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
 gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
   --member="serviceAccount:${RUNTIME_SA}" \
   --role="roles/secretmanager.secretAccessor"
+
+gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
+  --member="serviceAccount:${RUNTIME_SA}" \
+  --role="roles/datastore.user"
 
 gcloud secrets add-iam-policy-binding discord_bot_token \
   --member="serviceAccount:${RUNTIME_SA}" \
