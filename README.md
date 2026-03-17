@@ -16,8 +16,19 @@ The driver is botty_g.py, which implements a simple discord.Client.
 
 Different kinds of behavior are largely grouped together, and an attempt has been made to split them out into separate classes when it made sense to do so.
 
-All behaviors are tested, all code paths are tested the unit test level and each behavior has at least one integration test at the botty_g_test level.
-Unfortunately there is a slight testing gap in verifying that the discord library calls are being made correctly.
-However, there's no fake library for discord.py, and even if there was, I don't really want to put that much time into this.
+Tests are split between focused module tests and pytest-based integration tests for
+the Discord client behavior in `tests/test_botty_g_integration.py`.
 
-Honestly the most complicated thing about this bot has been organizing everything so that the unit tests work, since unittest doesn't play nice with asyncio.
+## Running Tests
+
+Install dev dependencies:
+
+```
+./.venv/bin/pip install -r requirements-dev.txt
+```
+
+Run tests:
+
+```
+./.venv/bin/python -m pytest -q
+```
