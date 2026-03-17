@@ -122,7 +122,7 @@ class BottyG(discord.Client):
   EMOJIS = defaultdict(lambda: 'Failed to load Atomic Frontier emojis!')
 
   def __init__(self):
-    pass
+    super().__init__(intents=intents)
 
   def _get_emoji(self, _id, server="atomic_frontier"):
     if server == "atomic_frontier":
@@ -182,7 +182,7 @@ class BottyG(discord.Client):
     # Quotes
     if msg.startswith('!advice') or msg.startswith('!quote'):
       logger.info('Sending advice.')
-      rand_num = random.randint(0, len(QUOTES))
+      rand_num = random.randint(0, len(QUOTES) - 1)
       await message.channel.send(QUOTES[rand_num])
 
     # Add emoji reactions to messages
