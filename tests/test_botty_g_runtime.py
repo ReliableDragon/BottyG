@@ -4,6 +4,7 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 
 import botty_g
+from bot import config as bot_config
 
 
 def _mock_secret_response(token):
@@ -117,6 +118,30 @@ def test_get_keyword_mention_count_defaults_to_zero(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_increment_keyword_mentions_async_uses_to_thread(monkeypatch):
+  to_thread_mock = AsyncMock(return_value=None)
+  monkeypatch.setattr(botty_g.asyncio, "to_thread", to_thread_mock)
+
+  await botty_g.increment_keyword_mentions_async("rocket")
+
+  to_thread_mock.assert_awaited_once_with(
+      botty_g.increment_keyword_mentions, "rocket")
+
+
+@pytest.mark.asyncio
+async def test_get_all_keyword_mention_counts_async_uses_to_thread(monkeypatch):
+  expected = {"rocket": 1, "james": 2, "loss": 3}
+  to_thread_mock = AsyncMock(return_value=expected)
+  monkeypatch.setattr(botty_g.asyncio, "to_thread", to_thread_mock)
+
+  result = await botty_g.get_all_keyword_mention_counts_async()
+
+  assert result == expected
+  to_thread_mock.assert_awaited_once_with(
+      botty_g.get_all_keyword_mention_counts)
+
+
+@pytest.mark.asyncio
 async def test_quote_command_can_select_last_quote(monkeypatch):
   client = botty_g.BottyG()
   client.rocketry = types.SimpleNamespace(
@@ -166,3 +191,7 @@ async def test_command_messages_skip_counters_and_passive_reactions(monkeypatch)
   rocket_mock.assert_awaited_once_with(message)
   counter_mock.assert_not_called()
   reaction_mock.assert_not_awaited()
+
+
+def test_validate_runtime_config_accepts_defaults():
+  bot_config.validate_runtime_config()

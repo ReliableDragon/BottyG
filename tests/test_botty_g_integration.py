@@ -136,10 +136,11 @@ async def test_help_and_reaction_list_commands(ready_bot, message_factory, comma
 async def test_mention_count_commands(ready_bot, message_factory, command, keyword, count):
   tested, _ = ready_bot
   message = message_factory(command)
-  with mock.patch("botty_g.get_keyword_mention_count", return_value=count) as count_mock:
+  all_counts = {"rocket": 0, "james": 0, "loss": 0}
+  all_counts[keyword] = count
+  with mock.patch("botty_g.get_all_keyword_mention_counts", return_value=all_counts):
     await tested.on_message(message)
 
-  count_mock.assert_called_once_with(keyword)
   message.channel.send.assert_called_once_with(
       f"'{keyword}' has been mentioned {count} time(s).")
   message.add_reaction.assert_not_called()
@@ -151,12 +152,12 @@ async def test_counts_command(ready_bot, message_factory):
   message = message_factory("!counts")
 
   with mock.patch(
-      "botty_g.get_keyword_mention_count",
-      side_effect=lambda keyword: {
+      "botty_g.get_all_keyword_mention_counts",
+      return_value={
           "rocket": 4,
           "james": 9,
           "loss": 2,
-      }[keyword]):
+      }):
     await tested.on_message(message)
 
   message.channel.send.assert_called_once_with(

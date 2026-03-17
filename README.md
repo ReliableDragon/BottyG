@@ -32,3 +32,11 @@ Run tests:
 ```
 ./.venv/bin/python -m pytest -q
 ```
+
+Run Firestore integration tests (emulator-gated):
+
+```
+export FIRESTORE_EMULATOR_HOST=127.0.0.1:8080
+export BOTTYG_RUN_FIRESTORE_IT=1
+./.venv/bin/python -m pytest -q -m integration
+```

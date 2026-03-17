@@ -1,6 +1,7 @@
 import logging
 import re
 
+from bot.config import MILD_USER_ID
 
 async def add_reactions(message, emojis):
   logger = logging.getLogger("root")
@@ -80,7 +81,7 @@ async def add_reactions(message, emojis):
   # name="󠇰 󠇰", discriminator="8273"
   # id: 410832969599811585
   # my id: 466722871733911553
-  if message.author.id == 410832969599811585:
+  if message.author.id == MILD_USER_ID:
     msg = ''.join([c for c in msg if c == ' ' or c.isalpha()])
     idea_phrases = [
       r"(?:i|ive) (?:(?!(?:not?|you|he|she|they)\b)\w+ )*(?:had|have|got|came up with|(?:(?:you|he|she|they|it|this) (?:(?!not?\b)\w+ )*gave (?:(?!no\b)\w+ )*me)) (?:(?!no\b)\w+ )*idea",

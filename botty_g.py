@@ -1,13 +1,28 @@
+import asyncio
 import discord
-import random
 import logging
-import re
+import random
 import reactions
 import rocket_utils
 
 from logging.handlers import RotatingFileHandler
 from collections import defaultdict
 from google.cloud import secretmanager
+from bot.config import (
+    ALL_COUNTS_COMMAND,
+    ATOMIC_FRONTIER_ID,
+    DEMO_SERVER_ID,
+    DISCORD_INTENTS,
+    EMOJI_IDS,
+    MENTION_COUNT_COMMANDS,
+    MENTION_PATTERNS,
+    PROJECT_ID,
+    SECRET_ID,
+    validate_runtime_config,
+)
+from bot.content import COMMANDS, QUOTES, REACTION_IMAGES, REACTION_IMAGES_MSG
+from bot.handlers.commands import handle_counter_commands, handle_simple_commands
+from bot.services import mentions_store
 from timezone_converter import generate_time_zone_response
 
 my_handler = RotatingFileHandler(
@@ -18,25 +33,8 @@ logger = logging.getLogger('root')
 logger.setLevel(logging.DEBUG)
 logger.addHandler(my_handler)
 
-PROJECT_ID = "bottyg"
-SECRET_ID = "discord_bot_token"
-MENTIONS_COLLECTION = "stats"
-MENTIONS_DOC = "mention_counts"
-
-MENTION_PATTERNS = {
-    "rocket": re.compile(r"\brockets?\b"),
-    "james": re.compile(r"\bjames(?:'s)?\b"),
-    "loss": re.compile(r"\bloss\b"),
-}
-
-MENTION_COUNT_COMMANDS = {
-    "!rocket_count": "rocket",
-    "!james_count": "james",
-    "!loss_count": "loss",
-}
-ALL_COUNTS_COMMAND = "!counts"
-
-_firestore_client = None
+MENTIONS_COLLECTION = mentions_store.MENTIONS_COLLECTION
+MENTIONS_DOC = mentions_store.MENTIONS_DOC
 
 
 def get_discord_token():
@@ -52,34 +50,15 @@ def get_discord_token():
 
 
 def get_firestore_client():
-  global _firestore_client
-  if _firestore_client is not None:
-    return _firestore_client
-
-  import firebase_admin
-  from firebase_admin import firestore
-
-  try:
-    firebase_admin.get_app()
-  except ValueError:
-    firebase_admin.initialize_app(options={"projectId": PROJECT_ID})
-
-  _firestore_client = firestore.client()
-  return _firestore_client
+  return mentions_store.get_firestore_client(PROJECT_ID)
 
 
 def _get_firestore_increment():
-  from firebase_admin import firestore
-  return firestore.Increment
+  return mentions_store._get_firestore_increment()
 
 
 def extract_keyword_mentions(message_text):
-  msg = message_text.lower()
-  return {
-      key: len(pattern.findall(msg))
-      for key, pattern in MENTION_PATTERNS.items()
-      if pattern.search(msg)
-  }
+  return mentions_store.extract_keyword_mentions(message_text, MENTION_PATTERNS)
 
 
 def increment_keyword_mentions(message_text):
@@ -96,122 +75,55 @@ def increment_keyword_mentions(message_text):
     db.collection(MENTIONS_COLLECTION).document(MENTIONS_DOC).set(
         updates, merge=True)
   except Exception:
-    logger.exception("Failed to persist keyword mention counters.")
+    logger.exception('Failed to persist keyword mention counters.')
 
 
-def get_keyword_mention_count(keyword):
+def get_all_keyword_mention_counts():
   try:
     db = get_firestore_client()
     snapshot = db.collection(MENTIONS_COLLECTION).document(MENTIONS_DOC).get()
     data = snapshot.to_dict() if snapshot else None
-    if not data:
-      return 0
-    count = data.get(keyword, 0)
-    return int(count)
+    data = data or {}
+    return {
+        keyword: int(data.get(keyword, 0))
+        for keyword in MENTION_PATTERNS.keys()
+    }
   except Exception:
-    logger.exception("Failed to read keyword mention count for %s.", keyword)
-    return 0
+    logger.exception('Failed to read keyword mention counts.')
+    return {keyword: 0 for keyword in MENTION_PATTERNS.keys()}
 
-QUOTES = (
-    'It is difficult to say what is impossible, for the dream of yesterday is the hope of today and the reality of tomorrow.',
-    'Just remember - when you think all is lost, the future remains.',
-    'The reason many people fail is not for lack of vision but for lack of resolve and resolve is born out of counting the cost.',
-    'No matter how much progress one makes, there is always the thrill of just beginning.',
-    'It is not a simple matter to differentiate unsuccessful from successful experiments. . . .[Most] work that is finally successful is the result of a series of unsuccessful tests in which difficulties are gradually eliminated.',
-    'But perhaps revelation often comes when you\'re not looking for it, resolution when you don\'t realize you need it.',
-    'The only barrier to human development is ignorance, and this is not insurmountable.',
-    'Set goals, challenge yourself, and achieve them. Live a healthy life ... and make every moment count. Rise above the obstacles, and focus on the positive.',
-    'Every vision is a joke until the first man accomplishes it; once realized, it becomes commonplace.',
-    'Failure crowns enterprise.',
-    'Just as in the sciences we have learned that we are too ignorant to safely pronounce anything impossible, so for the individual, since we cannot know just what are his limitations, we can hardly say with certainty that anything is necessarily within or beyond his grasp.',
-    'Each must remember that no one can predict to what heights of wealth, fame, or usefulness he may rise until he has honestly endeavored.',
-    'It has often proved true that the dream of yesterday is the hope of today and the reality of tomorrow.'
-)
 
-BAGUETTE_CLIP = "https://cdn.discordapp.com/attachments/875464533362216960/880994913918013500/this_baguette.mp4"
-SAND_CLIP = "https://cdn.discordapp.com/attachments/800703974205685790/820105727707447336/sandful_of_hand.mp4"
-DANCE_CLIP = "https://cdn.discordapp.com/attachments/800703974205685790/830025367325900800/Go-James-Go.gif"
+def get_keyword_mention_count(keyword):
+  all_counts = get_all_keyword_mention_counts()
+  return all_counts.get(keyword, 0)
 
-NOPE_GIF = "https://tenor.com/view/simpsons-bart-simpson-grampa-simpson-old-man-hi-bye-gif-8390063"
-SYNAPSID_PIC = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Leonid_Brezhnev_and_Richard_Nixon_talks_in_1973.png/1600px-Leonid_Brezhnev_and_Richard_Nixon_talks_in_1973.png"
-TIME_ZONES_GIF = "https://tenor.com/view/time-zones-wp-fairly-oddparents-gif-21690567"
-BLINK_GIF = "https://tenor.com/view/umm-confused-blinking-okay-white-guy-blinking-gif-7513882"
-PERFECT_GIF = "https://tenor.com/view/pacha-perfect-emperors-new-groove-very-good-gif-5346522"
-AERODYNAMIC_COW_GIF = "https://tenor.com/view/cow-airflow-diagram-vectors-aerodynamics-gif-4785226"
-CLAP_GIF = "https://tenor.com/view/good-job-clapping-leonardo-dicaprio-bravo-great-gif-7248435"
 
-REACTION_IMAGES = {
-    "!baguette": BAGUETTE_CLIP,
-    "!snacktime": SAND_CLIP,
-    "!danceparty": DANCE_CLIP,
-    "!nope": NOPE_GIF,
-    "!synapsid": SYNAPSID_PIC,
-    "!timezones": TIME_ZONES_GIF,
-    "!confusion": BLINK_GIF,
-    "!perfection": PERFECT_GIF,
-    "!cow": AERODYNAMIC_COW_GIF,
-    "!clap": CLAP_GIF,
-}
+async def increment_keyword_mentions_async(message_text):
+  await asyncio.to_thread(increment_keyword_mentions, message_text)
 
-EMOJI_IDS = {
-    'bobby_g': 875428431133810740,
-    'spotty3': 868858496257515520,
-    'spotty4': 868858506776817675,
-    'spotty_fire': 871843033883213914,
-    'spotty_nose_cone': 868858516687958126,
-    'spotty_nose_cone_rev': 875529103984431154,
-    'spotty_thruster': 871842514213142598,
-    'spotty_thruster_rev': 875529093729357855,
-    'stinky_fish': 879257588225679390,
-    'james': 871742964102205480,
-    'stop': 868861043210870794,
-}
 
-COMMANDS = """```
-!rocket
-!roorkcet
-!{ro|or|ck|kc|et|te}...
-!payload
-!crash
-!quote
-!convert TIME_ZONE HH:MM TIME_ZONE...
-More commands:
-!reactions
-!rocket_count
-!james_count
-!loss_count
-!counts
-```"""
+async def get_all_keyword_mention_counts_async():
+  return await asyncio.to_thread(get_all_keyword_mention_counts)
 
-REACTION_IMAGES_MSG = """```
-!baguette
-!snacktime
-!danceparty
-!synapsid
-!nope
-!timezones
-!confusion
-!perfection
-!cow
-!clap
-```"""
-
-ZERO_WIDTH_SPACE = "​"
-
-intents = discord.Intents.default()
-intents.message_content = True
 
 class BottyG(discord.Client):
   EMOJIS = defaultdict(lambda: 'Failed to load Atomic Frontier emojis!')
 
-  def __init__(self):
-    super().__init__(intents=intents)
+  def __init__(
+      self,
+      *,
+      increment_mentions_async=increment_keyword_mentions_async,
+      get_all_counts_async=get_all_keyword_mention_counts_async,
+  ):
+    super().__init__(intents=DISCORD_INTENTS)
+    self._increment_mentions_async = increment_mentions_async
+    self._get_all_counts_async = get_all_counts_async
 
-  def _get_emoji(self, _id, server="atomic_frontier"):
-    if server == "atomic_frontier":
+  def _get_emoji(self, _id, server='atomic_frontier'):
+    if server == 'atomic_frontier':
       return str(discord.utils.get(
           self.atomic_frontier.emojis, id=_id))
-    elif server == "demo_server":
+    elif server == 'demo_server':
       return str(discord.utils.get(
           self.demo_server.emojis, id=_id))
 
@@ -236,14 +148,12 @@ class BottyG(discord.Client):
     logger.info(self.user.id)
     logger.info('------')
 
-    demo_server_id = 879111900485517394
-    self.demo_server = self.get_guild(demo_server_id)
-    if self.demo_server == None:
+    self.demo_server = self.get_guild(DEMO_SERVER_ID)
+    if self.demo_server is None:
       logger.warning('Failed to load demo server!')
 
-    atomic_frontier_id = 800703973890850836
-    self.atomic_frontier = self.get_guild(atomic_frontier_id)
-    if self.atomic_frontier == None:
+    self.atomic_frontier = self.get_guild(ATOMIC_FRONTIER_ID)
+    if self.atomic_frontier is None:
       logger.warning('Failed to load Atomic Frontier data!')
 
     self._populate_emojis()
@@ -251,73 +161,52 @@ class BottyG(discord.Client):
     logger.info('All emojis loaded!')
 
   async def on_message(self, message):
-    msg = message.content.lower()
-    is_command = msg.startswith("!")
+    msg = message.content.lower().strip()
+    cmd_token = msg.split()[0] if msg else ''
+    is_command = cmd_token.startswith('!')
     logger.info('Got a message: {}'.format(msg))
 
-    # Self-loop check
     if message.author == self.user:
       logger.info('We sent this message!')
       return
 
-    # Mention counter query commands
-    for command, keyword in MENTION_COUNT_COMMANDS.items():
-      if msg.startswith(command):
-        count = get_keyword_mention_count(keyword)
-        await message.channel.send(
-            f"'{keyword}' has been mentioned {count} time(s).")
-        return
-    if msg.startswith(ALL_COUNTS_COMMAND):
-      rocket_count = get_keyword_mention_count("rocket")
-      james_count = get_keyword_mention_count("james")
-      loss_count = get_keyword_mention_count("loss")
-      await message.channel.send(
-          "Current mention totals:\n"
-          f"rocket: {rocket_count}\n"
-          f"james: {james_count}\n"
-          f"loss: {loss_count}")
+    if is_command and await handle_counter_commands(
+        cmd_token=cmd_token,
+        message=message,
+        get_all_counts_async=self._get_all_counts_async,
+        mention_count_commands=MENTION_COUNT_COMMANDS,
+        all_counts_command=ALL_COUNTS_COMMAND,
+    ):
       return
 
     if not is_command:
-      increment_keyword_mentions(message.content)
+      await self._increment_mentions_async(message.content)
 
-    # Rocket commands
-    await self.rocketry.gen_rocket_command_responses(message)
+    if is_command:
+      await self.rocketry.gen_rocket_command_responses(message)
+      if await handle_simple_commands(
+          cmd_token=cmd_token,
+          message=message,
+          logger=logger,
+          quotes=QUOTES,
+          reaction_images=REACTION_IMAGES,
+          commands_msg=COMMANDS,
+          reaction_images_msg=REACTION_IMAGES_MSG,
+          randint_fn=random.randint,
+      ):
+        return
 
-    # Quotes
-    if msg.startswith('!advice') or msg.startswith('!quote'):
-      logger.info('Sending advice.')
-      rand_num = random.randint(0, len(QUOTES) - 1)
-      await message.channel.send(QUOTES[rand_num])
-
-    # Add emoji reactions to messages
     if not is_command:
       await reactions.add_reactions(message, self.EMOJIS)
 
-    # Reaction images
-    for key in REACTION_IMAGES:
-      if msg.startswith(key):
-        logger.info('Sending reaction image for {}.'.format(key))
-        await message.channel.send(REACTION_IMAGES[key])
-
-    # Timezone conversion
     time_zone_response = generate_time_zone_response(msg)
-    if time_zone_response != None:
-      logger.info('Responding to time zone conversion request.'.format(key))
+    if time_zone_response is not None:
+      logger.info('Responding to time zone conversion request.')
       await message.channel.send(time_zone_response)
 
-    # Help text
-    if msg.startswith('!help') or msg.startswith('!commands'):
-      logger.info('Sending command list.')
-      await message.channel.send(COMMANDS)
 
-    # Reactions list
-    if msg.startswith('!reactions'):
-      logger.info('Sending reaction list.')
-      await message.channel.send(REACTION_IMAGES_MSG)
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
+  validate_runtime_config()
   token = get_discord_token()
   botty_g = BottyG()
   botty_g.run(token)
