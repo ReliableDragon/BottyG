@@ -61,7 +61,7 @@ def extract_keyword_mentions(message_text):
   return mentions_store.extract_keyword_mentions(message_text, MENTION_PATTERNS)
 
 
-def increment_keyword_mentions(message_text):
+def increment_keyword_mentions(message_text, guild_scope=None):
   mention_counts = extract_keyword_mentions(message_text)
   if not mention_counts:
     return
@@ -72,16 +72,20 @@ def increment_keyword_mentions(message_text):
     updates = {
         key: increment(count) for key, count in mention_counts.items()
     }
-    db.collection(MENTIONS_COLLECTION).document(MENTIONS_DOC).set(
+    scope = str(guild_scope) if guild_scope is not None else mentions_store.DM_SCOPE
+    db.collection(MENTIONS_COLLECTION).document(MENTIONS_DOC).collection(
+        "guilds").document(scope).set(
         updates, merge=True)
   except Exception:
     logger.exception('Failed to persist keyword mention counters.')
 
 
-def get_all_keyword_mention_counts():
+def get_all_keyword_mention_counts(guild_scope=None):
   try:
     db = get_firestore_client()
-    snapshot = db.collection(MENTIONS_COLLECTION).document(MENTIONS_DOC).get()
+    scope = str(guild_scope) if guild_scope is not None else mentions_store.DM_SCOPE
+    snapshot = db.collection(MENTIONS_COLLECTION).document(MENTIONS_DOC).collection(
+        "guilds").document(scope).get()
     data = snapshot.to_dict() if snapshot else None
     data = data or {}
     return {
@@ -93,17 +97,17 @@ def get_all_keyword_mention_counts():
     return {keyword: 0 for keyword in MENTION_PATTERNS.keys()}
 
 
-def get_keyword_mention_count(keyword):
-  all_counts = get_all_keyword_mention_counts()
+def get_keyword_mention_count(keyword, guild_scope=None):
+  all_counts = get_all_keyword_mention_counts(guild_scope)
   return all_counts.get(keyword, 0)
 
 
-async def increment_keyword_mentions_async(message_text):
-  await asyncio.to_thread(increment_keyword_mentions, message_text)
+async def increment_keyword_mentions_async(message_text, guild_scope=None):
+  await asyncio.to_thread(increment_keyword_mentions, message_text, guild_scope)
 
 
-async def get_all_keyword_mention_counts_async():
-  return await asyncio.to_thread(get_all_keyword_mention_counts)
+async def get_all_keyword_mention_counts_async(guild_scope=None):
+  return await asyncio.to_thread(get_all_keyword_mention_counts, guild_scope)
 
 
 class BottyG(discord.Client):
@@ -164,6 +168,7 @@ class BottyG(discord.Client):
     msg = message.content.lower().strip()
     cmd_token = msg.split()[0] if msg else ''
     is_command = cmd_token.startswith('!')
+    guild_scope = str(message.guild.id) if getattr(message, "guild", None) else mentions_store.DM_SCOPE
     logger.info('Got a message: {}'.format(msg))
 
     if message.author == self.user:
@@ -180,7 +185,7 @@ class BottyG(discord.Client):
       return
 
     if not is_command:
-      await self._increment_mentions_async(message.content)
+      await self._increment_mentions_async(message.content, guild_scope)
 
     if is_command:
       await self.rocketry.gen_rocket_command_responses(message)

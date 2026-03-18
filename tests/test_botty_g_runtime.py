@@ -69,17 +69,21 @@ def test_extract_keyword_mentions_ignores_non_word_matches():
 
 def test_increment_keyword_mentions_persists_counts(monkeypatch):
   set_mock = Mock()
-  document_mock = Mock(set=set_mock)
-  collection_mock = Mock(document=Mock(return_value=document_mock))
-  db_mock = Mock(collection=Mock(return_value=collection_mock))
+  guild_document_mock = Mock(set=set_mock)
+  guilds_collection_mock = Mock(document=Mock(return_value=guild_document_mock))
+  root_document_mock = Mock(collection=Mock(return_value=guilds_collection_mock))
+  root_collection_mock = Mock(document=Mock(return_value=root_document_mock))
+  db_mock = Mock(collection=Mock(return_value=root_collection_mock))
 
   monkeypatch.setattr(botty_g, "get_firestore_client", Mock(return_value=db_mock))
   monkeypatch.setattr(botty_g, "_get_firestore_increment", Mock(return_value=lambda n: ("INC", n)))
 
-  botty_g.increment_keyword_mentions("rocket rockets james loss")
+  botty_g.increment_keyword_mentions("rocket rockets james loss", guild_scope="123")
 
   db_mock.collection.assert_called_once_with("stats")
-  collection_mock.document.assert_called_once_with("mention_counts")
+  root_collection_mock.document.assert_called_once_with("mention_counts")
+  root_document_mock.collection.assert_called_once_with("guilds")
+  guilds_collection_mock.document.assert_called_once_with("123")
   set_mock.assert_called_once_with(
       {"rocket": ("INC", 2), "james": ("INC", 1), "loss": ("INC", 1)},
       merge=True,
@@ -97,24 +101,28 @@ def test_increment_keyword_mentions_no_matches_skips_firestore(monkeypatch):
 
 def test_get_keyword_mention_count_reads_firestore_value(monkeypatch):
   snapshot_mock = Mock(to_dict=Mock(return_value={"rocket": 9}))
-  document_mock = Mock(get=Mock(return_value=snapshot_mock))
-  collection_mock = Mock(document=Mock(return_value=document_mock))
-  db_mock = Mock(collection=Mock(return_value=collection_mock))
+  guild_document_mock = Mock(get=Mock(return_value=snapshot_mock))
+  guilds_collection_mock = Mock(document=Mock(return_value=guild_document_mock))
+  root_document_mock = Mock(collection=Mock(return_value=guilds_collection_mock))
+  root_collection_mock = Mock(document=Mock(return_value=root_document_mock))
+  db_mock = Mock(collection=Mock(return_value=root_collection_mock))
   monkeypatch.setattr(botty_g, "get_firestore_client", Mock(return_value=db_mock))
 
-  count = botty_g.get_keyword_mention_count("rocket")
+  count = botty_g.get_keyword_mention_count("rocket", guild_scope="777")
 
   assert count == 9
 
 
 def test_get_keyword_mention_count_defaults_to_zero(monkeypatch):
   snapshot_mock = Mock(to_dict=Mock(return_value=None))
-  document_mock = Mock(get=Mock(return_value=snapshot_mock))
-  collection_mock = Mock(document=Mock(return_value=document_mock))
-  db_mock = Mock(collection=Mock(return_value=collection_mock))
+  guild_document_mock = Mock(get=Mock(return_value=snapshot_mock))
+  guilds_collection_mock = Mock(document=Mock(return_value=guild_document_mock))
+  root_document_mock = Mock(collection=Mock(return_value=guilds_collection_mock))
+  root_collection_mock = Mock(document=Mock(return_value=root_document_mock))
+  db_mock = Mock(collection=Mock(return_value=root_collection_mock))
   monkeypatch.setattr(botty_g, "get_firestore_client", Mock(return_value=db_mock))
 
-  assert botty_g.get_keyword_mention_count("rocket") == 0
+  assert botty_g.get_keyword_mention_count("rocket", guild_scope="777") == 0
 
 
 @pytest.mark.asyncio
@@ -122,10 +130,10 @@ async def test_increment_keyword_mentions_async_uses_to_thread(monkeypatch):
   to_thread_mock = AsyncMock(return_value=None)
   monkeypatch.setattr(botty_g.asyncio, "to_thread", to_thread_mock)
 
-  await botty_g.increment_keyword_mentions_async("rocket")
+  await botty_g.increment_keyword_mentions_async("rocket", "555")
 
   to_thread_mock.assert_awaited_once_with(
-      botty_g.increment_keyword_mentions, "rocket")
+      botty_g.increment_keyword_mentions, "rocket", "555")
 
 
 @pytest.mark.asyncio
@@ -134,11 +142,11 @@ async def test_get_all_keyword_mention_counts_async_uses_to_thread(monkeypatch):
   to_thread_mock = AsyncMock(return_value=expected)
   monkeypatch.setattr(botty_g.asyncio, "to_thread", to_thread_mock)
 
-  result = await botty_g.get_all_keyword_mention_counts_async()
+  result = await botty_g.get_all_keyword_mention_counts_async("555")
 
   assert result == expected
   to_thread_mock.assert_awaited_once_with(
-      botty_g.get_all_keyword_mention_counts)
+      botty_g.get_all_keyword_mention_counts, "555")
 
 
 @pytest.mark.asyncio
@@ -191,6 +199,28 @@ async def test_command_messages_skip_counters_and_passive_reactions(monkeypatch)
   rocket_mock.assert_awaited_once_with(message)
   counter_mock.assert_not_called()
   reaction_mock.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_non_command_message_uses_guild_scoped_increment(monkeypatch):
+  increment_async_mock = AsyncMock()
+  client = botty_g.BottyG(increment_mentions_async=increment_async_mock)
+  client.rocketry = types.SimpleNamespace(
+      gen_rocket_command_responses=AsyncMock())
+  client.EMOJIS = {}
+  monkeypatch.setattr(botty_g.reactions, "add_reactions", AsyncMock())
+
+  message = types.SimpleNamespace(
+      content="rocket",
+      author=types.SimpleNamespace(id=1234),
+      guild=types.SimpleNamespace(id=98765),
+      channel=types.SimpleNamespace(send=AsyncMock()),
+      add_reaction=AsyncMock(),
+  )
+
+  await client.on_message(message)
+
+  increment_async_mock.assert_awaited_once_with("rocket", "98765")
 
 
 def test_validate_runtime_config_accepts_defaults():

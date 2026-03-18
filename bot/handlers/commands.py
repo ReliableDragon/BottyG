@@ -7,7 +7,8 @@ async def handle_counter_commands(
     get_all_counts_async,
     mention_count_commands,
     all_counts_command):
-  counts = await get_all_counts_async()
+  guild_scope = str(message.guild.id) if getattr(message, "guild", None) else "dm"
+  counts = await get_all_counts_async(guild_scope)
   if cmd_token in mention_count_commands:
     keyword = mention_count_commands[cmd_token]
     count = counts.get(keyword, 0)

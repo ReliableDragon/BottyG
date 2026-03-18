@@ -38,6 +38,7 @@ def message_factory():
     return types.SimpleNamespace(
         content=content,
         author=author or MockUser(name="Javert", user_id=911),
+        guild=types.SimpleNamespace(id=42),
         channel=types.SimpleNamespace(send=AsyncMock()),
         add_reaction=AsyncMock(),
     )

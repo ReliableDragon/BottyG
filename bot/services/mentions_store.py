@@ -6,6 +6,7 @@ from bot.config import MENTIONS_COLLECTION, MENTIONS_DOC, MENTION_PATTERNS
 logger = logging.getLogger('root')
 
 _firestore_client = None
+DM_SCOPE = "dm"
 
 
 def get_firestore_client(project_id):
@@ -30,6 +31,22 @@ def _get_firestore_increment():
   return firestore.Increment
 
 
+def _normalize_scope(guild_scope):
+  if guild_scope is None:
+    return DM_SCOPE
+  return str(guild_scope)
+
+
+def _guild_doc(db, guild_scope):
+  scope = _normalize_scope(guild_scope)
+  return (
+      db.collection(MENTIONS_COLLECTION)
+      .document(MENTIONS_DOC)
+      .collection("guilds")
+      .document(scope)
+  )
+
+
 def extract_keyword_mentions(message_text, patterns=MENTION_PATTERNS):
   msg = message_text.lower()
   return {
@@ -39,7 +56,7 @@ def extract_keyword_mentions(message_text, patterns=MENTION_PATTERNS):
   }
 
 
-def increment_keyword_mentions(message_text, project_id):
+def increment_keyword_mentions(message_text, project_id, guild_scope=None):
   mention_counts = extract_keyword_mentions(message_text)
   if not mention_counts:
     return
@@ -50,16 +67,16 @@ def increment_keyword_mentions(message_text, project_id):
     updates = {
         key: increment(count) for key, count in mention_counts.items()
     }
-    db.collection(MENTIONS_COLLECTION).document(MENTIONS_DOC).set(
-        updates, merge=True)
+    _guild_doc(db, guild_scope).set(updates, merge=True)
   except Exception:
     logger.exception("Failed to persist keyword mention counters.")
 
 
-def get_all_keyword_mention_counts(project_id, keys=MENTION_PATTERNS.keys()):
+def get_all_keyword_mention_counts(
+    project_id, guild_scope=None, keys=MENTION_PATTERNS.keys()):
   try:
     db = get_firestore_client(project_id)
-    snapshot = db.collection(MENTIONS_COLLECTION).document(MENTIONS_DOC).get()
+    snapshot = _guild_doc(db, guild_scope).get()
     data = snapshot.to_dict() if snapshot else None
     data = data or {}
     return {
@@ -71,10 +88,11 @@ def get_all_keyword_mention_counts(project_id, keys=MENTION_PATTERNS.keys()):
     return {keyword: 0 for keyword in keys}
 
 
-async def increment_keyword_mentions_async(message_text, project_id):
-  await asyncio.to_thread(increment_keyword_mentions, message_text, project_id)
+async def increment_keyword_mentions_async(message_text, project_id, guild_scope=None):
+  await asyncio.to_thread(
+      increment_keyword_mentions, message_text, project_id, guild_scope)
 
 
-async def get_all_keyword_mention_counts_async(project_id):
-  return await asyncio.to_thread(get_all_keyword_mention_counts, project_id)
-
+async def get_all_keyword_mention_counts_async(project_id, guild_scope=None):
+  return await asyncio.to_thread(
+      get_all_keyword_mention_counts, project_id, guild_scope)
